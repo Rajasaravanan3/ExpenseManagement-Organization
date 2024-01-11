@@ -1,0 +1,20 @@
+									
+
+							Approvals
+							   |
+							   -----------------------------------------------------------------------------------
+							   |										     |
+							expense										    user
+							   |										     |
+		    -------------------------------------------------------------------------------					  -------------
+		    |				|		     |				  |					  |	      |
+
+		category		    currency		paymentMethod			user					role 	organization
+		    |										  |						      |
+	    ----------------								  ------------------					   address
+	    |		   |								  |		   |	
+	budget		organization							role		organization			    	   
+	    |		   |										   |
+	organization	address										address
+	    |
+	address

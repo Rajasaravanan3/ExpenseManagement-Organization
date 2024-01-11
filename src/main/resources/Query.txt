@@ -1,0 +1,103 @@
+
+create database Expense_management;
+use Expense_management;
+-- drop database Expense_management;
+
+
+create table Address(
+	address_id bigint unsigned not null auto_increment primary key,
+    street varchar(30),
+    city varchar(25) not null,
+    state varchar(30) not null,
+    country varchar(30) not null,
+    zip_code varchar(10) not null
+);
+
+create table Organization(
+	organization_id bigint unsigned not null auto_increment primary key,
+	organization_name varchar(40) not null,
+    organization_number varchar(20) unique not null,
+    address_id bigint unsigned not null,
+    is_active boolean default true,
+    foreign key (address_id) references address(address_id)
+);
+
+create table Role(
+	role_id bigint unsigned not null auto_increment primary key,
+    role_name varchar(40) unique not null,
+    role_description varchar(300),
+    is_approver boolean default false
+);
+
+create table user(
+	user_id bigint unsigned not null auto_increment primary key,
+    user_name varchar(50) not null,
+    role_id bigint unsigned not null,
+    user_email varchar(350) unique not null,
+    user_password varchar(130) not null,
+    is_active boolean default true,
+    organization_id bigint unsigned not null,
+    foreign key (role_id) references role(role_id),
+    foreign key (organization_id) references organization(organization_id)
+);
+
+create table currency(
+	currency_id int unsigned not null auto_increment primary key,
+    currency_code varchar(3) not null,
+    currency_name varchar(30)
+);
+
+create table payment_method(
+	payment_method_id int unsigned not null auto_increment primary key,
+    payment_method_name varchar(20) unique not null,
+    payment_method_description varchar(300)
+);
+
+create table budget(
+	budget_id bigint unsigned not null auto_increment primary key,
+    budget_amount decimal(10,2) not null default 0.0,
+    budget_type varchar(30) not null,
+    created_date timestamp not null default current_timestamp,
+    modified_date timestamp not null default current_timestamp on update current_timestamp,
+    is_active boolean not null default true,
+    organization_id bigint unsigned not null,
+    foreign key (organization_id) references Organization(organization_id)
+);
+
+create table category(
+	category_id bigint unsigned not null auto_increment primary key,
+    category_name varchar(40) not null,
+    category_description varchar(300),
+    created_date timestamp not null default current_timestamp,
+    modified_date timestamp not null default current_timestamp on update current_timestamp,
+    is_active boolean not null default true,
+    organization_id bigint unsigned not null,
+    budget_id bigint unsigned not null,
+    foreign key (budget_id) references budget(budget_id),
+    foreign key (organization_id) references organization(organization_id)
+);
+
+create table expense(
+	expense_id bigint unsigned not null auto_increment primary key,
+    amount Decimal(10,2) not null,
+    expense_date timestamp not null default current_timestamp,
+    expense_description varchar(1000) not null,
+    category_id bigint unsigned not null,
+    currency_id int unsigned not null,
+    payment_method_id int unsigned not null,
+    expense_made_by bigint unsigned not null,
+    foreign key (category_id) references category(category_id),
+    foreign key (currency_id) references currency(currency_id),
+    foreign key (payment_method_id) references payment_method(payment_method_id),
+    foreign key (expense_made_by) references user(user_id)
+);
+
+create table Approvals(
+	approval_id bigint unsigned not null auto_increment primary key,
+    approved_by bigint unsigned not null,
+    approved_date timestamp not null default current_timestamp,
+    expense_id bigint unsigned not null,
+    unique key unique_approval(approved_by, expense_id),
+    foreign key (expense_id) references expense(expense_id),
+    foreign key (approved_by) references user(user_id)
+);
