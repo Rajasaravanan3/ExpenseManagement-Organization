@@ -53,17 +53,6 @@ create table payment_method(
     payment_method_description varchar(300)
 );
 
-create table budget(
-	budget_id bigint unsigned not null auto_increment primary key,
-    budget_amount decimal(10,2) not null default 0.0,
-    budget_type varchar(30) not null,
-    created_date timestamp not null default current_timestamp,
-    modified_date timestamp not null default current_timestamp on update current_timestamp,
-    is_active boolean not null default true,
-    organization_id bigint unsigned not null,
-    foreign key (organization_id) references Organization(organization_id)
-);
-
 create table category(
 	category_id bigint unsigned not null auto_increment primary key,
     category_name varchar(40) not null,
@@ -72,9 +61,18 @@ create table category(
     modified_date timestamp not null default current_timestamp on update current_timestamp,
     is_active boolean not null default true,
     organization_id bigint unsigned not null,
-    budget_id bigint unsigned not null,
-    foreign key (budget_id) references budget(budget_id),
     foreign key (organization_id) references organization(organization_id)
+);
+
+create table budget(
+	budget_id bigint unsigned not null auto_increment primary key,
+    budget_amount decimal(10,2) not null default 0.0,
+    budget_type varchar(30) not null,
+    created_date timestamp not null default current_timestamp,
+    modified_date timestamp not null default current_timestamp on update current_timestamp,
+    is_active boolean not null default true,
+    category_id bigint unsigned not null,
+    foreign key (category_id) references Category(category_id)
 );
 
 create table expense(
@@ -101,3 +99,144 @@ create table Approvals(
     foreign key (expense_id) references expense(expense_id),
     foreign key (approved_by) references user(user_id)
 );
+
+
+
+INSERT INTO address (address_id, street, city, state, country, zip_code)
+VALUES
+(1, '123 Main St', 'CityA', 'StateA', 'CountryA', '12345'),
+(2, '456 Elm St', 'CityB', 'StateB', 'CountryB', '56789'),
+(3, '789 Oak St', 'CityC', 'StateC', 'CountryC', '98765'),
+(4, '101 Maple St', 'CityD', 'StateD', 'CountryD', '43210'),
+(5, '202 Pine St', 'CityE', 'StateE', 'CountryE', '13579'),
+(6, '303 Birch St', 'CityF', 'StateF', 'CountryF', '24680'),
+(7, '404 Cedar St', 'CityG', 'StateG', 'CountryG', '97531'),
+(8, '505 Walnut St', 'CityH', 'StateH', 'CountryH', '86420'),
+(9, '606 Spruce St', 'CityI', 'StateI', 'CountryI', '11111'),
+(10, '707 Cherry St', 'CityJ', 'StateJ', 'CountryJ', '22222');
+
+
+INSERT INTO organization (organization_id, organization_name, organization_number, address_id, is_active)
+VALUES
+(1, 'CompanyA', 'Org123', 1, true),
+(2, 'CompanyB', 'Org456', 2, true),
+(3, 'CompanyC', 'Org789', 3, true),
+(4, 'CompanyD', 'Org101', 4, true),
+(5, 'CompanyE', 'Org202', 5, true),
+(6, 'CompanyF', 'Org303', 6, true),
+(7, 'CompanyG', 'Org404', 7, true),
+(8, 'CompanyH', 'Org505', 8, true),
+(9, 'CompanyI', 'Org606', 9, true),
+(10, 'CompanyJ', 'Org707', 10, true);
+
+
+INSERT INTO role (role_id, role_name, role_description, is_approver)
+VALUES
+(1, 'Admin', 'System Administrator', true),
+(2, 'Manager', 'Department Manager', true),
+(3, 'Employee', 'Regular Employee', false),
+(4, 'Supervisor', 'Team Supervisor', false),
+(5, 'Analyst', 'Data Analyst', false),
+(6, 'Developer', 'Software Developer', false),
+(7, 'FinanceManager', 'Finance Manager', false),
+(8, 'HRManager', 'HR Manager', false),
+(9, 'MarketingManager', 'Marketing Manager', false),
+(10, 'SalesManager', 'Sales Manager', false);
+
+
+INSERT INTO user (user_id, user_name, role_id, user_email, user_password, is_active, organization_id)
+VALUES
+(1, 'John Doe', 1, 'john@example.com', 'hashedpassword1', true, 1),
+(2, 'Jane Smith', 2, 'jane@example.com', 'hashedpassword2', true, 2),
+(3, 'Bob Johnson', 3, 'bob@example.com', 'hashedpassword3', true, 3),
+(4, 'Alice Williams', 4, 'alice@example.com', 'hashedpassword4', true, 4),
+(5, 'Charlie Brown', 5, 'charlie@example.com', 'hashedpassword5', true, 5),
+(6, 'Eva Davis', 6, 'eva@example.com', 'hashedpassword6', true, 6),
+(7, 'Frank Wilson', 7, 'frank@example.com', 'hashedpassword7', true, 7),
+(8, 'Grace Moore', 8, 'grace@example.com', 'hashedpassword8', true, 8),
+(9, 'Henry Lee', 9, 'henry@example.com', 'hashedpassword9', true, 9),
+(10, 'Ivy Clark', 10, 'ivy@example.com', 'hashedpassword10', true, 10);
+
+
+INSERT INTO currency (currency_id, currency_code, currency_name)
+VALUES
+(1, 'USD', 'US Dollar'),
+(2, 'EUR', 'Euro'),
+(3, 'GBP', 'British Pound'),
+(4, 'JPY', 'Japanese Yen'),
+(5, 'CAD', 'Canadian Dollar'),
+(6, 'AUD', 'Australian Dollar'),
+(7, 'INR', 'Indian Rupee'),
+(8, 'CNY', 'Chinese Yuan'),
+(9, 'BRL', 'Brazilian Real'),
+(10, 'RUB', 'Russian Ruble');
+
+
+INSERT INTO payment_method (payment_method_id, payment_method_name, payment_method_description)
+VALUES
+(1, 'Credit Card', 'Payment via credit card'),
+(2, 'Bank Transfer', 'Payment via bank transfer'),
+(3, 'Cash', 'Payment in cash'),
+(4, 'PayPal', 'Payment via PayPal'),
+(5, 'Cheque', 'Payment by cheque'),
+(6, 'Cryptocurrency', 'Payment via cryptocurrency'),
+(7, 'Mobile Wallet', 'Payment via mobile wallet'),
+(8, 'ACH Transfer', 'Automated Clearing House transfer'),
+(9, 'Wire Transfer', 'Payment via wire transfer'),
+(10, 'Direct Debit', 'Payment via direct debit');
+
+
+INSERT INTO category (category_id, category_name, category_description, created_date, modified_date, is_active, organization_id)
+VALUES
+(1, 'Technology', 'IT and Technology Expenses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 1),
+(2, 'Travel', 'Travel and Transportation Expenses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 2),
+(3, 'Marketing', 'Marketing and Advertising Expenses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 3),
+(4, 'Utilities', 'Utilities and Bills', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 4),
+(5, 'Training', 'Employee Training Expenses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 5),
+(6, 'Equipment', 'Office Equipment Purchase', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 6),
+(7, 'Events', 'Company Events and Celebrations', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 7),
+(8, 'Software', 'Software Licenses and Subscriptions', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 8),
+(9, 'Consulting', 'Consulting Services Expenses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 9),
+(10, 'Miscellaneous', 'Miscellaneous Expenses', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 10);
+
+
+INSERT INTO budget (budget_id, budget_amount, budget_type, created_date, modified_date, is_active, category_id)
+VALUES
+(1, 1000.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 1),
+(2, 2000.00, 'MONTHLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 2),
+(3, 5000.00, 'YEARLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 3),
+(4, 1500.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 4),
+(5, 3000.00, 'MONTHLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 5),
+(6, 8000.00, 'YEARLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 6),
+(7, 2500.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 7),
+(8, 6000.00, 'MONTHLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 8),
+(9, 10000.00, 'YEARLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 9),
+(10, 4000.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 10);
+
+
+INSERT INTO expense (expense_id, amount, expense_date, expense_description, category_id, currency_id, payment_method_id, expense_made_by)
+VALUES
+(1, 150.00, '2024-01-10', 'Office Supplies Purchase', 1, 1, 1, 1),
+(2, 250.00, '2024-01-15', 'Business Trip Expenses', 2, 2, 2, 2),
+(3, 120.00, '2024-02-01', 'Marketing Materials', 3, 1, 3, 3),
+(4, 80.00, '2024-02-10', 'Utility Bill Payment', 4, 2, 4, 4),
+(5, 500.00, '2024-03-05', 'Employee Training Session', 5, 1, 5, 5),
+(6, 1000.00, '2024-03-20', 'Purchase of Office Equipment', 6, 2, 6, 6),
+(7, 2000.00, '2024-04-02', 'Company Annual Event', 7, 1, 7, 7),
+(8, 350.00, '2024-04-15', 'Software License Renewal', 8, 2, 8, 8),
+(9, 800.00, '2024-05-10', 'Consulting Service', 9, 1, 9, 9),
+(10, 50.00, '2024-05-25', 'Miscellaneous Expenses', 10, 2, 10, 10);
+
+
+INSERT INTO approvals (approval_id, approved_by, approved_date, expense_id)
+VALUES
+(1, 2, '2024-01-15', 1),
+(2, 3, '2024-02-01', 2),
+(3, 4, '2024-02-10', 3),
+(4, 5, '2024-03-05', 4),
+(5, 6, '2024-03-20', 5),
+(6, 7, '2024-04-02', 6),
+(7, 8, '2024-04-15', 7),
+(8, 9, '2024-05-10', 8),
+(9, 10, '2024-05-25', 9),
+(10, 1, '2024-01-10', 10);

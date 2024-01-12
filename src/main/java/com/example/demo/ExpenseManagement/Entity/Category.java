@@ -1,21 +1,19 @@
 package com.example.demo.ExpenseManagement.Entity;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 
 @Entity
 public class Category {
     
     @Id
     @Column(name = "category_id")
-    private long categoryId;
+    private Long categoryId;
 
     @Column(name = "category_name")
     private String categoryName;
@@ -36,14 +34,10 @@ public class Category {
     @JoinColumn(name = "organization_id", referencedColumnName = "organization_id")
     private Organization organization;
 
-    @OneToMany
-    @JoinColumn(name = "budget_id", referencedColumnName = "budget_id")
-    private Budget budgets;
-
     public Category() {}
 
-    public Category(long categoryId, String categoryName, String categoryDescription, ZonedDateTime createdDate,
-            ZonedDateTime modifiedDate, boolean isActive, Organization organization, Budget budgets) {
+    public Category(Long categoryId, String categoryName, String categoryDescription, ZonedDateTime createdDate,
+            ZonedDateTime modifiedDate, boolean isActive, Organization organization) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
         this.categoryDescription = categoryDescription;
@@ -51,14 +45,13 @@ public class Category {
         this.modifiedDate = modifiedDate;
         this.isActive = isActive;
         this.organization = organization;
-        this.budgets = budgets;
     }
 
-    public long getCategoryId() {
+    public Long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(long categoryId) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 
@@ -110,23 +103,6 @@ public class Category {
         this.modifiedDate = modifiedDate;
     }
 
-    public Budget getBudgets() {
-        return budgets;
-    }
-
-    public void setBudgets(Budget budgets) {
-        this.budgets = budgets;
-    }
-
-    
-    // public List<Budget> getBudgets() {
-    //     return budgets;
-    // }
-
-    // public void setBudgets(List<Budget> budgets) {
-    //     this.budgets = budgets;
-    // }
-    
 }
 
     // category_id bigint unsigned not null auto_increment primary key,
@@ -137,5 +113,4 @@ public class Category {
     // is_active boolean not null default true,
     // organization_id bigint unsigned not null,
     // budget_id bigint unsigned not null,
-    // foreign key (budget_id) references budget(budget_id),
     // foreign key (organization_id) references organization(organization_id)

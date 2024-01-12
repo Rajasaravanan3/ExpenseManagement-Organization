@@ -9,7 +9,7 @@ public class PaymentMethod {
     
     @Id
     @Column(name = "payment_method_id")
-    private int paymentMethodId;
+    private Integer paymentMethodId;
 
     @Column(name = "payment_method_name")
     private String paymentMethodName;
@@ -19,17 +19,17 @@ public class PaymentMethod {
 
     public PaymentMethod() {}
 
-    public PaymentMethod(int paymentMethodId, String paymentMethodName, String paymentMethodDescription) {
+    public PaymentMethod(Integer paymentMethodId, String paymentMethodName, String paymentMethodDescription) {
         this.paymentMethodId = paymentMethodId;
         this.paymentMethodName = paymentMethodName;
         this.paymentMethodDescription = paymentMethodDescription;
     }
 
-    public int getPaymentMethodId() {
+    public Integer getPaymentMethodId() {
         return paymentMethodId;
     }
 
-    public void setPaymentMethodId(int paymentMethodId) {
+    public void setPaymentMethodId(Integer paymentMethodId) {
         this.paymentMethodId = paymentMethodId;
     }
 

@@ -11,17 +11,4 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 
 	}
-
 }
-
-
-
-
-
-
-
-
-
-
-
-		// System.out.println(ZonedDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.SECONDS));

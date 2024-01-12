@@ -9,7 +9,7 @@ public class Role {
     
     @Id
     @Column(name = "role_id")
-    private long roleId;
+    private Long roleId;
 
     @Column(name = "role_name")
     private String roleName;
@@ -22,18 +22,18 @@ public class Role {
 
     public Role() {}
 
-    public Role(long roleId, String roleName, String roleDescription, boolean isActive) {
+    public Role(Long roleId, String roleName, String roleDescription, boolean isActive) {
         this.roleId = roleId;
         this.roleName = roleName;
         this.roleDescription = roleDescription;
         this.isActive = isActive;
     }
 
-    public long getRoleId() {
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(long roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 

@@ -14,7 +14,7 @@ public class Budget {
     
     @Id
     @Column(name = "budget_id")
-    private long budgetId;
+    private Long budgetId;
 
     @Column(name = "budget_amount")
     private BigDecimal budgetAmount;
@@ -32,27 +32,27 @@ public class Budget {
     private boolean isActive;
 
     @ManyToOne
-    @JoinColumn(name = "organization_id", referencedColumnName = "organization_id")
-    private Organization organization;
+    @JoinColumn(name = "category_id", referencedColumnName = "category_id")
+    private Category category;
 
     public Budget() {}
 
-    public Budget(long budgetId, BigDecimal budgetAmount, String budgetType, ZonedDateTime createdTime,
-            ZonedDateTime modifiedTime, boolean isActive, Organization organization) {
+    public Budget(Long budgetId, BigDecimal budgetAmount, String budgetType, ZonedDateTime createdTime,
+            ZonedDateTime modifiedTime, boolean isActive, Category category) {
         this.budgetId = budgetId;
         this.budgetAmount = budgetAmount;
         this.budgetType = budgetType;
         this.createdTime = createdTime;
         this.modifiedTime = modifiedTime;
         this.isActive = isActive;
-        this.organization = organization;
+        this.category = category;
     }
 
-    public long getBudgetId() {
+    public Long getBudgetId() {
         return budgetId;
     }
 
-    public void setBudgetId(long budgetId) {
+    public void setBudgetId(Long budgetId) {
         this.budgetId = budgetId;
     }
 
@@ -96,22 +96,21 @@ public class Budget {
         this.isActive = isActive;
     }
 
-    public Organization getOrganization() {
-        return organization;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
+    public void setCategory(Category category) {
+        this.category = category;
     }
-
     
 }
 
     // budget_id bigint unsigned not null auto_increment primary key,
     // budget_amount decimal(10,2) not null default 0.0,
     // budget_type varchar(30) not null,
-    // created_time datetime not null,
-    // modified_time datetime not null,
+    // created_date timestamp not null default current_timestamp,
+    // modified_date timestamp not null default current_timestamp on update current_timestamp,
     // is_active boolean not null default true,
-    // organization_id bigint unsigned not null,
-    // foreign key (organization_id) references Organization(organization_id)
+    // category_id bigint unsigned not null,
+    // foreign key (category_id) references Category(category_id)

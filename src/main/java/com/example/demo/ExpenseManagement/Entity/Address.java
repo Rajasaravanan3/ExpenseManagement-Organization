@@ -4,12 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
+
 @Entity
 public class Address {
     
     @Id
     @Column(name = "address_id")
-    private long addressId;
+    private Long addressId;
 
     @Column(name = "street")
     private String street;
@@ -29,7 +30,7 @@ public class Address {
     public Address() {
     }
 
-    public Address(long addressId, String street, String city, String state, String country, String zipCode) {
+    public Address(Long addressId, String street, String city, String state, String country, String zipCode) {
         this.addressId = addressId;
         this.street = street;
         this.city = city;
@@ -38,11 +39,11 @@ public class Address {
         this.zipCode = zipCode;
     }
 
-    public long getAddressId() {
+    public Long getAddressId() {
         return addressId;
     }
 
-    public void setAddressId(long addressId) {
+    public void setAddressId(Long addressId) {
         this.addressId = addressId;
     }
 

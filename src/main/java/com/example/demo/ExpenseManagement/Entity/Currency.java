@@ -9,7 +9,7 @@ public class Currency {
     
     @Id
     @Column(name = "currency_id")
-    private int currencyId;
+    private Integer currencyId;
 
     @Column(name = "currency_code")
     private String currencyCode;
@@ -19,17 +19,17 @@ public class Currency {
 
     public Currency() {}
 
-    public Currency(int currencyId, String currencyCode, String currencyName) {
+    public Currency(Integer currencyId, String currencyCode, String currencyName) {
         this.currencyId = currencyId;
         this.currencyCode = currencyCode;
         this.currencyName = currencyName;
     }
 
-    public int getCurrencyId() {
+    public Integer getCurrencyId() {
         return currencyId;
     }
 
-    public void setCurrencyId(int currencyId) {
+    public void setCurrencyId(Integer currencyId) {
         this.currencyId = currencyId;
     }
 

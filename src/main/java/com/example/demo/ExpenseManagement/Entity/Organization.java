@@ -11,7 +11,7 @@ public class Organization {
     
     @Id
     @Column(name = "organization_id")
-    private long organizationId;
+    private Long organizationId;
 
     @Column(name = "organization_name")
     private String organizationName;
@@ -20,7 +20,7 @@ public class Organization {
     private String organizationNumber;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
 
     @OneToOne
     @JoinColumn(name = "address_id", referencedColumnName = "address_id")
@@ -28,7 +28,7 @@ public class Organization {
 
     public Organization() {}
 
-    public Organization(long organizationId, String organizationName, String organizationNumber, boolean isActive,
+    public Organization(Long organizationId, String organizationName, String organizationNumber, Boolean isActive,
             Address address) {
         this.organizationId = organizationId;
         this.organizationName = organizationName;
@@ -37,11 +37,11 @@ public class Organization {
         this.address = address;
     }
 
-    public long getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 
-    public void setOrganizationId(long organizationId) {
+    public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
 
@@ -61,11 +61,11 @@ public class Organization {
         this.organizationNumber = organizationNumber;
     }
 
-    public boolean getIsActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
-    public void setIsActive(boolean isActive) {
+    public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 
