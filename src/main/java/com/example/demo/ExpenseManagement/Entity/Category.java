@@ -28,7 +28,7 @@ public class Category {
     private ZonedDateTime modifiedDate;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "organization_id", referencedColumnName = "organization_id")
@@ -37,7 +37,7 @@ public class Category {
     public Category() {}
 
     public Category(Long categoryId, String categoryName, String categoryDescription, ZonedDateTime createdDate,
-            ZonedDateTime modifiedDate, boolean isActive, Organization organization) {
+            ZonedDateTime modifiedDate, Boolean isActive, Organization organization) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
         this.categoryDescription = categoryDescription;
@@ -79,11 +79,11 @@ public class Category {
         this.createdDate = createdDate;
     }
 
-    public boolean isActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean isActive) {
+    public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 

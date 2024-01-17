@@ -23,7 +23,7 @@ public class User {
     private String userPassword;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private Boolean isActive;
 
     @OneToOne
     @JoinColumn(name = "role_id", referencedColumnName = "role_id")
@@ -35,7 +35,7 @@ public class User {
 
     public User() {}
 
-    public User(Long userId, String userName, String userEmail, String userPassword, boolean isActive, Role role,
+    public User(Long userId, String userName, String userEmail, String userPassword, Boolean isActive, Role role,
             Organization organization) {
         this.userId = userId;
         this.userName = userName;
@@ -78,11 +78,11 @@ public class User {
         this.userPassword = userPassword;
     }
 
-    public boolean isActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean isActive) {
+    public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 

@@ -23,7 +23,7 @@ public class OrganizationService {
     @Autowired
     private AddressService addressService;
 
-    public Organization getOrganizationById(Long organizationId) {
+    public OrganizationDTO getOrganizationById(Long organizationId) {
         
         Organization organization = null;
         try {
@@ -31,6 +31,7 @@ public class OrganizationService {
             if(organization == null) {
                 throw new ValidationException("No record found for the organization Id " + organizationId, HttpStatus.NOT_FOUND);
             }
+            return this.mapOrganizationToOrganizationDTO(organization);
         }
         catch (ValidationException e) {
             throw e;
@@ -38,20 +39,22 @@ public class OrganizationService {
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while retrieving organization by Id "+ organizationId);
         }
-        return organization;
     }
 
     public void addOrganization(OrganizationDTO organizationDTO) {
 
+        Organization organization = null;
         try {
             if(organizationDTO == null ||
-            (organizationDTO.getOrganizationName() instanceof String || organizationDTO.getOrganizationName().isEmpty() || organizationDTO.getOrganizationName().length() > 40) ||
-            (organizationDTO.getOrganizationNumber() instanceof String || organizationDTO.getOrganizationNumber().isEmpty() || organizationDTO.getOrganizationNumber().length() > 20) ||
+            (organizationDTO.getOrganizationName() instanceof String && (organizationDTO.getOrganizationName().isEmpty() || organizationDTO.getOrganizationName().length() > 40)) ||
+            (organizationDTO.getOrganizationNumber() instanceof String && (organizationDTO.getOrganizationNumber().isEmpty() || organizationDTO.getOrganizationNumber().length() > 20)) ||
             (organizationDTO.getAddressId() == null)) {
 
                 throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             }
-
+            organization = this.mapOrganizationDTOToOrganization(organizationDTO);
+            organization.setAddress(addressService.getAddressById(organizationDTO.getAddressId()));
+            organizationRepository.saveAndFlush(organization);
         }
         catch (ValidationException e) {
             throw e;
@@ -59,14 +62,17 @@ public class OrganizationService {
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while saving the organization.");
         }
-        organizationRepository.save(this.mapOrganizationDTOToOrganization(organizationDTO));
     }
 
     public void updateOrganization(OrganizationDTO updatedOrganizationDTO) {
 
         Organization existingOrganization = null;
         try {
-            existingOrganization = this.getOrganizationById(updatedOrganizationDTO.getOrganizationId());
+            existingOrganization = organizationRepository.findOrganizationById(updatedOrganizationDTO.getOrganizationId());
+
+            if(existingOrganization == null) {
+                throw new ValidationException("No record found to update for the organization ID" + updatedOrganizationDTO.getOrganizationId(), HttpStatus.NOT_FOUND);
+            }
 
             if(updatedOrganizationDTO.getOrganizationName() instanceof String || ! (updatedOrganizationDTO.getOrganizationName().isEmpty())) {
 
@@ -82,10 +88,8 @@ public class OrganizationService {
                 existingOrganization.setOrganizationNumber(updatedOrganizationDTO.getOrganizationNumber());
             }
 
-            if(updatedOrganizationDTO.getIsActive() != null) {
+            if(updatedOrganizationDTO.getIsActive() instanceof Boolean) {
 
-                if(updatedOrganizationDTO.getOrganizationNumber().length() > 20)
-                    throw new ValidationException("Organization number must not exceed 20 characters", HttpStatus.BAD_REQUEST);
                 existingOrganization.setIsActive(updatedOrganizationDTO.getIsActive());
             }
 

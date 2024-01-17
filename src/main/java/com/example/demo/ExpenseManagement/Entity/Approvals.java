@@ -22,15 +22,15 @@ public class Approvals {
 
     @OneToOne
     @JoinColumn(name = "expense_id", referencedColumnName = "expense_id")
-    private Long expenseId;
+    private Long expense;
 
     public Approvals() {}
 
-    public Approvals(Long approvalId, ZonedDateTime approvedDate, Long approvedBy, Long expenseId) {
+    public Approvals(Long approvalId, ZonedDateTime approvedDate, Long approvedBy, Long expense) {
         this.approvalId = approvalId;
         this.approvedDate = approvedDate;
         this.approvedBy = approvedBy;
-        this.expenseId = expenseId;
+        this.expense = expense;
     }
 
     public Long getApprovalId() {
@@ -58,11 +58,11 @@ public class Approvals {
     }
 
     public Long getExpenseId() {
-        return expenseId;
+        return expense;
     }
 
-    public void setExpenseId(Long expenseId) {
-        this.expenseId = expenseId;
+    public void setExpenseId(Long expense) {
+        this.expense = expense;
     }
     
 }

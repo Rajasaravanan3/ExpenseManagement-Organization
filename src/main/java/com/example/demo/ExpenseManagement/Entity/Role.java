@@ -18,11 +18,11 @@ public class Role {
     private String roleDescription;
 
     @Column(name = "is_approver")
-    private boolean isActive;
+    private Boolean isActive;
 
     public Role() {}
 
-    public Role(Long roleId, String roleName, String roleDescription, boolean isActive) {
+    public Role(Long roleId, String roleName, String roleDescription, Boolean isActive) {
         this.roleId = roleId;
         this.roleName = roleName;
         this.roleDescription = roleDescription;
@@ -53,11 +53,11 @@ public class Role {
         this.roleDescription = roleDescription;
     }
 
-    public boolean isActive() {
+    public Boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean isActive) {
+    public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 

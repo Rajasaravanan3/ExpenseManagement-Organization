@@ -37,13 +37,14 @@ public class AddressService {
 
         try {
             if(address == null || (address.getCity() instanceof String || address.getCity().isEmpty() || address.getCity().length() > 25) ||
-            (address.getStreet() instanceof String || address.getStreet().length() > 30) ||
-            (address.getState() instanceof String || address.getState().isEmpty() || address.getState().length() > 30) ||
-            (address.getCountry() instanceof String || address.getCountry().isEmpty() || address.getCountry().length() > 30) ||
-            (address.getZipCode() instanceof String || address.getZipCode().isEmpty() || address.getZipCode().length() > 10)) {
+            (address.getStreet() instanceof String && (address.getStreet().length() > 30)) ||
+            (address.getState() instanceof String && (address.getState().isEmpty() || address.getState().length() > 30)) ||
+            (address.getCountry() instanceof String && (address.getCountry().isEmpty() || address.getCountry().length() > 30)) ||
+            (address.getZipCode() instanceof String && (address.getZipCode().isEmpty() || address.getZipCode().length() > 10))) {
 
                 throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit", HttpStatus.BAD_REQUEST);
             }
+            addressRepository.saveAndFlush(address);
         }
         catch (ValidationException e) {
             throw e;
@@ -51,7 +52,6 @@ public class AddressService {
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while saving");
         }
-        addressRepository.save(address);
     }
     
     public void updateAddress(Address updatedAddress) {
@@ -90,6 +90,7 @@ public class AddressService {
                     throw new ValidationException("Provide a valid Zip code", HttpStatus.BAD_REQUEST);
                 existingAddress.setZipCode(updatedAddress.getZipCode());
             }
+            addressRepository.save(existingAddress);
         }
         catch (ValidationException e) {
             throw e;
@@ -98,6 +99,5 @@ public class AddressService {
             throw new ApplicationException("An unexpected error occurred while updating");
         }
 
-        addressRepository.save(existingAddress);
     }
 }

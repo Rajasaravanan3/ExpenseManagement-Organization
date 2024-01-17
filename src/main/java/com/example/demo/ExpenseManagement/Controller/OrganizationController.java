@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.ExpenseManagement.DTO.OrganizationDTO;
-import com.example.demo.ExpenseManagement.Entity.Organization;
 import com.example.demo.ExpenseManagement.Service.OrganizationService;
 
 @RestController
@@ -22,20 +22,20 @@ public class OrganizationController {
     private OrganizationService organizationService;
     
     @GetMapping("/{organizationId}")
-    public ResponseEntity<Organization> getOrganizationById(@PathVariable Long organizationId) {
+    public ResponseEntity<OrganizationDTO> getOrganizationById(@PathVariable Long organizationId) {
         
         return new ResponseEntity<>(organizationService.getOrganizationById(organizationId), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Void> addOrganization(OrganizationDTO organizationDTO) {
+    public ResponseEntity<Void> addOrganization(@RequestBody OrganizationDTO organizationDTO) {
 
         organizationService.addOrganization(organizationDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<Void> updateOrganization(OrganizationDTO organizationDTO) {
+    public ResponseEntity<Void> updateOrganization(@RequestBody OrganizationDTO organizationDTO) {
         
         organizationService.updateOrganization(organizationDTO);
         return new ResponseEntity<>(HttpStatus.OK);
