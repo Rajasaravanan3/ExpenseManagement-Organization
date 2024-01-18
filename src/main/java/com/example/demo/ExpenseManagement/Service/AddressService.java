@@ -36,7 +36,7 @@ public class AddressService {
     public void addAddress(Address address) {
 
         try {
-            if(address == null || (address.getCity() instanceof String || address.getCity().isEmpty() || address.getCity().length() > 25) ||
+            if(address == null || (address.getCity() instanceof String && (address.getCity().isEmpty() || address.getCity().length() > 25)) ||
             (address.getStreet() instanceof String && (address.getStreet().length() > 30)) ||
             (address.getState() instanceof String && (address.getState().isEmpty() || address.getState().length() > 30)) ||
             (address.getCountry() instanceof String && (address.getCountry().isEmpty() || address.getCountry().length() > 30)) ||

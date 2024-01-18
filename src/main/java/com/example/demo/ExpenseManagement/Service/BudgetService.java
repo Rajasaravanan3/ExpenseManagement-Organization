@@ -45,19 +45,18 @@ public class BudgetService {
         }
     }
 
-    public void addBudget(BudgetDTO budgetDTO) {
+    public void addBudget(BudgetDTO budgetDTO) {        // budgetType string to enum
 
         Budget budget = null;
         try {
             if(budgetDTO == null || budgetDTO.getBudgetId() instanceof Long ||
-                (budgetDTO.getBudgetAmount() instanceof BigDecimal) ||  //check (10,2)
+                (budgetDTO.getBudgetAmount() instanceof BigDecimal && this.validateBigDecimal(budgetDTO.getBudgetAmount(), 10, 2)) ||
                 (budgetDTO.getBudgetType() instanceof String && (budgetDTO.getBudgetType().isEmpty() || budgetDTO.getBudgetType().length() > 30)) ||
                 (budgetDTO.getCategoryId() instanceof Long))
                     
                     throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             
             budget = this.mapBudgetDTOToBudget(budgetDTO);
-            budget.setCategory(categoryRepository.findCategoryById(budgetDTO.getCategoryId()));
             budgetRepository.saveAndFlush(budget);
         }
         catch (ValidationException e) {
@@ -81,7 +80,7 @@ public class BudgetService {
                 existingBudget.setBudgetType(updatedBudgetDTO.getBudgetType());
             }
 
-            if(updatedBudgetDTO.getBudgetAmount() instanceof BigDecimal) {  // validate (10,2) size
+            if(updatedBudgetDTO.getBudgetAmount() instanceof BigDecimal && this.validateBigDecimal(updatedBudgetDTO.getBudgetAmount(), 10, 2)) {
                 existingBudget.setBudgetAmount(updatedBudgetDTO.getBudgetAmount());
             }
 
@@ -122,5 +121,15 @@ public class BudgetService {
         Budget budget = mapper.map(budgetDTO, Budget.class);
         budget.setCategory(categoryRepository.findCategoryById(budgetDTO.getCategoryId()));
         return budget;
+    }
+
+    public boolean validateBigDecimal(BigDecimal bigDecimal,int range,int precision) {
+
+        String str = bigDecimal.toString();
+        String arr[] = str.split(".");
+        if(arr[0].length() <= range-precision && (arr.length >= 1 && arr[1].length() <= precision)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -3,6 +3,8 @@ package com.example.demo.ExpenseManagement.Entity;
 import java.time.ZonedDateTime;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -10,6 +12,7 @@ import jakarta.persistence.OneToOne;
 public class Approvals {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "approval_id")
     private Long approvalId;
 
