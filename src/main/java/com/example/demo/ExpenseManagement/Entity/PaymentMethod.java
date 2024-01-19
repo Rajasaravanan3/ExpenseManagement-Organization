@@ -53,7 +53,3 @@ public class PaymentMethod {
     }
     
 }
-
-    // payment_method_id int unsigned not null auto_increment primary key,
-    // payment_method_name varchar(20) unique not null,
-    // payment_method_description varchar(300)

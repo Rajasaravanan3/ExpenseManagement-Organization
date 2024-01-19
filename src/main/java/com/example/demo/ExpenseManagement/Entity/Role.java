@@ -65,8 +65,3 @@ public class Role {
     }
 
 }
-
-    // role_id mediumint unsigned not null primary key,
-    // role_name varchar(40) unique not null,
-    // role_description varchar(300),
-    // is_approver boolean default false

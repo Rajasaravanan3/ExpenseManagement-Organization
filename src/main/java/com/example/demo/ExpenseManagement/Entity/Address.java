@@ -91,10 +91,3 @@ public class Address {
     }
 
 }
-
-    // address_id int unsigned not null primary key,
-    // street varchar(30),
-    // city varchar(25) not null,
-    // state varchar(30) not null,
-    // country varchar(30) not null,
-    // zip_code int not null

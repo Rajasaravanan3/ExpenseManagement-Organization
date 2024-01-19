@@ -107,13 +107,3 @@ public class Category {
     }
 
 }
-
-    // category_id bigint unsigned not null auto_increment primary key,
-    // category_name varchar(40) not null,
-    // category_description varchar(300),
-    // created_date timestamp not null default current_timestamp,
-    // modified_date timestamp not null default current_timestamp on update current_timestamp,
-    // is_active boolean not null default true,
-    // organization_id bigint unsigned not null,
-    // budget_id bigint unsigned not null,
-    // foreign key (organization_id) references organization(organization_id)

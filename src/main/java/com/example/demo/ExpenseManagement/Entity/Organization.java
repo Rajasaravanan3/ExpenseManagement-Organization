@@ -81,10 +81,3 @@ public class Organization {
     }
 
 }
-
-    // organization_id bigint unsigned not null auto_increment primary key,
-	// organization_name varchar(40) not null,
-    // organization_number varchar(20) unique not null,
-    // address_id bigint unsigned not null,
-    // is_active boolean default true,
-    // foreign key (address_id) references address(address_id)

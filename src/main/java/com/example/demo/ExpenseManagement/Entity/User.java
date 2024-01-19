@@ -104,13 +104,4 @@ public class User {
     public void setOrganization(Organization organization) {
         this.organization = organization;
     }
-
-    // user_id bigint unsigned not null auto_increment primary key,
-    // user_name varchar(50) not null,
-    // role_id bigint unsigned not null,
-    // user_email varchar(350) unique not null,
-    // user_password varchar(130) not null,
-    // is_active boolean default true,
-    // organization_id bigint unsigned not null,
-    // foreign key (organization_id) references organization(organization_id)
 }

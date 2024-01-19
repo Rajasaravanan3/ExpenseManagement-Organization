@@ -39,9 +39,9 @@ public class CategoryService {
         catch (ValidationException e) {
             throw e;
         }
-        catch (Exception e) {
-            throw new ApplicationException("An unexpected error occurred while retrieving category by Id "+ categoryId);
-        }
+        // catch (Exception e) {
+        //     throw new ApplicationException("An unexpected error occurred while retrieving category by Id "+ categoryId);
+        // }
     }
 
     public void addCategory(CategoryDTO categoryDTO) {
@@ -75,7 +75,7 @@ public class CategoryService {
                 throw new ValidationException("No record found to update for the catgeory id" + updatedCategoryDTO.getCategoryId(), HttpStatus.NOT_FOUND);
             }
 
-            if(updatedCategoryDTO.getCategoryName() instanceof String || ! (updatedCategoryDTO.getCategoryName().isEmpty())) {
+            if(updatedCategoryDTO.getCategoryName() instanceof String && ! (updatedCategoryDTO.getCategoryName().isEmpty())) {
 
                 if(updatedCategoryDTO.getCategoryName().length() > 40)
                     throw new ValidationException("category name must not exceed 40 characters", HttpStatus.BAD_REQUEST);
@@ -120,6 +120,7 @@ public class CategoryService {
 
         CategoryDTO categoryDTO = mapper.map(category, CategoryDTO.class);
         categoryDTO.setOrganizationId(category.getOrganization().getOrganizationId());
+        
         return categoryDTO;
     }
 

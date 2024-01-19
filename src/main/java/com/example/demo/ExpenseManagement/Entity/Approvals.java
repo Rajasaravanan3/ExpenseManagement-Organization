@@ -69,11 +69,3 @@ public class Approvals {
     }
     
 }
-
-    // approval_id bigint unsigned not null auto_increment primary key,
-    // approved_by bigint unsigned not null,
-    // approved_date timestamp not null default current_timestamp,
-    // expense_id bigint unsigned not null,
-    // unique key unique_approval(approved_by, expense_id),
-    // foreign key (expense_id) references expense(expense_id),
-    // foreign key (approved_by) references user(user_id)

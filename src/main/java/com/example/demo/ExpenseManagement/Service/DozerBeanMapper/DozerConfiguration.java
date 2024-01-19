@@ -1,4 +1,4 @@
-package com.example.demo.ExpenseManagement.Service;
+package com.example.demo.ExpenseManagement.Service.DozerBeanMapper;
 
 import org.dozer.DozerBeanMapper;
 import org.springframework.context.annotation.Bean;

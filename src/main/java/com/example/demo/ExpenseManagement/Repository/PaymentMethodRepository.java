@@ -8,6 +8,6 @@ import com.example.demo.ExpenseManagement.Entity.PaymentMethod;
 
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Integer> {
     
-    @Query("Select p from PaymentMethod p where p.paymentMethodId = : paymentMethodId")
+    @Query("Select p from PaymentMethod p where p.paymentMethodId = :paymentMethodId")
     PaymentMethod findPaymentMethodById(@Param("paymentMethodId") Integer paymentMethodId);
 }

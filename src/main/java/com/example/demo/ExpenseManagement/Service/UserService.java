@@ -27,6 +27,9 @@ public class UserService {
     @Autowired
     private OrganizationRepository organizationRepository;
 
+    @Autowired
+    private OrganizationService organizationService;
+
     public UserDTO getUserById(Long userId) {
         
         User user = null;
@@ -80,21 +83,21 @@ public class UserService {
                 throw new ValidationException("No record found to update for the userId " + updatedUserDTO.getUserId(), HttpStatus.NOT_FOUND);
             }
 
-            if(updatedUserDTO.getUserName() instanceof String || ! (updatedUserDTO.getUserName().isEmpty())) {
+            if(updatedUserDTO.getUserName() instanceof String && ! (updatedUserDTO.getUserName().isEmpty())) {
 
                 if(updatedUserDTO.getUserName().length() > 50)
                     throw new ValidationException("User name must not exceed 50 characters", HttpStatus.BAD_REQUEST);
                 existingUser.setUserName(updatedUserDTO.getUserName());
             }
 
-            if(updatedUserDTO.getUserEmail() instanceof String || ! (updatedUserDTO.getUserEmail().isEmpty())) {
+            if(updatedUserDTO.getUserEmail() instanceof String && ! (updatedUserDTO.getUserEmail().isEmpty())) {
 
                 if(updatedUserDTO.getUserEmail().length() > 350)
                     throw new ValidationException("User email must not exceed 350 characters", HttpStatus.BAD_REQUEST);
                 existingUser.setUserEmail(updatedUserDTO.getUserEmail());
             }
 
-            if(updatedUserDTO.getUserPassword() instanceof String || ! (updatedUserDTO.getUserPassword().isEmpty())) {
+            if(updatedUserDTO.getUserPassword() instanceof String && ! (updatedUserDTO.getUserPassword().isEmpty())) {
 
                 if(updatedUserDTO.getUserPassword().length() > 130)
                     throw new ValidationException("User password must not exceed 130 characters", HttpStatus.BAD_REQUEST);
@@ -106,12 +109,12 @@ public class UserService {
                 existingUser.setIsActive(updatedUserDTO.getIsActive());
             }
 
-            if(updatedUserDTO.getRoleId() != 0 && roleService.getRoleById(updatedUserDTO.getRoleId()) != null) {
+            if(updatedUserDTO.getRoleId() instanceof Long && roleService.getRoleById(updatedUserDTO.getRoleId()) != null) {
 
                 existingUser.setRole(roleService.getRoleById(updatedUserDTO.getRoleId()));
             }
 
-            if(updatedUserDTO.getOrganizationId() != 0 && organizationRepository.findOrganizationById(updatedUserDTO.getOrganizationId()) != null) {
+            if(updatedUserDTO.getOrganizationId() instanceof Long && organizationService.getOrganizationById(updatedUserDTO.getOrganizationId()) != null) {
 
                 existingUser.setOrganization(organizationRepository.findOrganizationById(updatedUserDTO.getOrganizationId()));
             }
@@ -120,9 +123,9 @@ public class UserService {
         catch (ValidationException e) {
             throw e;
         }
-        catch (Exception e) {
-            throw new ApplicationException("An unexpected error occurred while updating.");
-        }
+        // catch (Exception e) {
+        //     throw new ApplicationException("An unexpected error occurred while updating.");
+        // }
     }
 
     public UserDTO mapUserToUserDTO(User user) {

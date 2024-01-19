@@ -53,7 +53,3 @@ public class Currency {
     }
 
 }
-
-    // currency_id smallint unsigned not null auto_increment primary key,
-    // currency_code varchar(3) not null,
-    // currency_name varchar(30)

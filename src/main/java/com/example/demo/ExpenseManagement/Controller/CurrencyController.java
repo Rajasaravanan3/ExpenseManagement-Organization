@@ -21,7 +21,7 @@ public class CurrencyController {
     @Autowired
     private CurrencyService currencyService;
     
-    @GetMapping
+    @GetMapping("/{currencyId}")
     public ResponseEntity<Currency> getCurrencyById(@PathVariable("currencyId") Integer currencyId) {
         return new ResponseEntity<>(currencyService.getCurrencyById(currencyId), HttpStatus.OK);
     }

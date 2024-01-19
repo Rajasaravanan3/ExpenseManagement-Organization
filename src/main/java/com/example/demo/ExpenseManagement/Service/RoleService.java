@@ -57,14 +57,18 @@ public class RoleService {
         try {
             existingRole = roleRepository.findRoleById(updatedRole.getRoleId());
 
-            if(updatedRole.getRoleName() instanceof String || ! (updatedRole.getRoleName().isEmpty())) {
+            if(existingRole == null) {
+                throw new ValidationException("No record found ro update for the role id " + updatedRole.getRoleId(), HttpStatus.NOT_FOUND);
+            }
+
+            if(updatedRole.getRoleName() instanceof String && ! (updatedRole.getRoleName().isEmpty())) {
 
                 if(updatedRole.getRoleName().length() > 40)
                     throw new ValidationException("Role name must not exceed 40 characters", HttpStatus.BAD_REQUEST);
                 existingRole.setRoleName(updatedRole.getRoleName());
             }
 
-            if(updatedRole.getRoleDescription() instanceof String || ! (updatedRole.getRoleDescription().isEmpty())) {
+            if(updatedRole.getRoleDescription() instanceof String && ! (updatedRole.getRoleDescription().isEmpty())) {
 
                 if(updatedRole.getRoleDescription().length() > 300)
                     throw new ValidationException("Role description must not exceed 300 characters", HttpStatus.BAD_REQUEST);

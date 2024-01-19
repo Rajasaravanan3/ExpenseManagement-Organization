@@ -124,16 +124,3 @@ public class Expense {
     }
     
 }
-
-    // expense_id bigint unsigned not null auto_increment primary key,
-    // amount Decimal(10,2) not null,
-    // expense_date timestamp not null default current_timestamp,
-    // expense_description varchar(1000) not null,
-    // category_id bigint unsigned not null,
-    // currency_id int unsigned not null,
-    // payment_method_id int unsigned not null,
-    // expense_made_by bigint unsigned not null,
-    // foreign key (category_id) references category(category_id),
-    // foreign key (currency_id) references currency(currency_id),
-    // foreign key (payment_method_id) references payment_method(payment_method_id),
-    // foreign key (expense_made_by) references user(user_id)

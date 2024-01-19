@@ -108,12 +108,3 @@ public class Budget {
     }
     
 }
-
-    // budget_id bigint unsigned not null auto_increment primary key,
-    // budget_amount decimal(10,2) not null default 0.0,
-    // budget_type varchar(30) not null,
-    // created_date timestamp not null default current_timestamp,
-    // modified_date timestamp not null default current_timestamp on update current_timestamp,
-    // is_active boolean not null default true,
-    // category_id bigint unsigned not null,
-    // foreign key (category_id) references Category(category_id)
