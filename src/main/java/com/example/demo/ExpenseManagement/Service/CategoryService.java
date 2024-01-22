@@ -1,8 +1,9 @@
 package com.example.demo.ExpenseManagement.Service;
 
 import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
-import org.dozer.DozerBeanMapper;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private DozerBeanMapper mapper;
+    private ModelMapper mapper;
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -39,16 +40,16 @@ public class CategoryService {
         catch (ValidationException e) {
             throw e;
         }
-        // catch (Exception e) {
-        //     throw new ApplicationException("An unexpected error occurred while retrieving category by Id "+ categoryId);
-        // }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving category by Id "+ categoryId);
+        }
     }
 
     public void addCategory(CategoryDTO categoryDTO) {
 
         Category category = null;
         try {
-            if(categoryDTO == null || categoryDTO.getCategoryId() instanceof Long ||
+            if(categoryDTO == null ||
                 (categoryDTO.getCategoryName() instanceof String && (categoryDTO.getCategoryName().isEmpty() || categoryDTO.getCategoryName().length() > 40)) ||
                 (categoryDTO.getCategoryDescription() instanceof String && categoryDTO.getCategoryDescription().length() > 300) ||
                 (categoryDTO.getOrganizationId() == null))
@@ -56,7 +57,7 @@ public class CategoryService {
                     throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             
             category = this.mapCategoryDTOToCategory(categoryDTO);
-            category.setOrganization(organizationRepository.findOrganizationById(categoryDTO.getOrganizationId()));
+            
             categoryRepository.saveAndFlush(category);
         }
         catch (ValidationException e) {
@@ -95,13 +96,7 @@ public class CategoryService {
                 existingCategory.setIsActive(updatedCategoryDTO.getIsActive());
             }
 
-            if(updatedCategoryDTO.getCreatedDate() instanceof ZonedDateTime) {
-                existingCategory.setCreatedDate(updatedCategoryDTO.getCreatedDate());
-            }
-
-            if(updatedCategoryDTO.getModifiedDate() instanceof ZonedDateTime) {
-                existingCategory.setModifiedDate(updatedCategoryDTO.getModifiedDate());
-            }
+            existingCategory.setModifiedDate(ZonedDateTime.now(ZoneId.of("UTC")));
 
             if(updatedCategoryDTO.getOrganizationId() instanceof Long) {
                 existingCategory.setOrganization(organizationRepository.findOrganizationById(updatedCategoryDTO.getOrganizationId()));
@@ -120,7 +115,21 @@ public class CategoryService {
 
         CategoryDTO categoryDTO = mapper.map(category, CategoryDTO.class);
         categoryDTO.setOrganizationId(category.getOrganization().getOrganizationId());
-        
+
+        if(category.getCreatedDate() instanceof ZonedDateTime) {
+
+            ZonedDateTime createdDate = category.getCreatedDate();
+            ZonedDateTime createdSystemZonedDateTime = createdDate.withZoneSameInstant(ZoneId.systemDefault());
+            categoryDTO.setCreatedDate(createdSystemZonedDateTime);
+        }
+
+        if(category.getModifiedDate() instanceof ZonedDateTime) {
+
+            ZonedDateTime modifiedDate = category.getModifiedDate();
+            ZonedDateTime modifiedSystemZonedDateTime = modifiedDate.withZoneSameInstant(ZoneId.systemDefault());
+            categoryDTO.setModifiedDate(modifiedSystemZonedDateTime);
+        }
+
         return categoryDTO;
     }
 
@@ -128,6 +137,12 @@ public class CategoryService {
 
         Category category = mapper.map(categoryDTO, Category.class);
         category.setOrganization(organizationRepository.findOrganizationById(categoryDTO.getOrganizationId()));
+        category.setCreatedDate(ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()));
+            
+        if(category.getIsActive() == null) {
+            category.setIsActive(true);
+        }
+        category.setModifiedDate(ZonedDateTime.now(ZoneId.of("UTC")));
         return category;
     }
 }

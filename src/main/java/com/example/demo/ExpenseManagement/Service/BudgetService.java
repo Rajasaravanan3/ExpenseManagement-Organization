@@ -2,8 +2,9 @@ package com.example.demo.ExpenseManagement.Service;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
-import org.dozer.DozerBeanMapper;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class BudgetService {
     private BudgetRepository budgetRepository;
 
     @Autowired
-    private DozerBeanMapper mapper;
+    private ModelMapper mapper;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -49,13 +50,13 @@ public class BudgetService {
 
         Budget budget = null;
         try {
-            if(budgetDTO == null || budgetDTO.getBudgetId() instanceof Long ||
-                (budgetDTO.getBudgetAmount() instanceof BigDecimal && this.validateBigDecimal(budgetDTO.getBudgetAmount(), 10, 2)) ||
-                (budgetDTO.getBudgetType() instanceof String && (budgetDTO.getBudgetType().isEmpty() || budgetDTO.getBudgetType().length() > 30)) ||
-                (budgetDTO.getCategoryId() instanceof Long))
+            if(budgetDTO == null ||
+                (budgetDTO.getBudgetAmount() == null && this.validateBigDecimal(budgetDTO.getBudgetAmount(),10, 2)) ||
+                budgetDTO.getBudgetType() instanceof String && (budgetDTO.getBudgetType().isEmpty() || budgetDTO.getBudgetType().length() > 30) ||
+                budgetDTO.getCategoryId() == null) {
                     
                     throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
-            
+            }
             budget = this.mapBudgetDTOToBudget(budgetDTO);
             budgetRepository.saveAndFlush(budget);
         }
@@ -88,13 +89,7 @@ public class BudgetService {
                 existingBudget.setIsActive(updatedBudgetDTO.getIsActive());
             }
 
-            if(updatedBudgetDTO.getCreatedTime() instanceof ZonedDateTime) {
-                existingBudget.setCreatedTime(updatedBudgetDTO.getCreatedTime());
-            }
-
-            if(updatedBudgetDTO.getModifiedTime() instanceof ZonedDateTime) {
-                existingBudget.setModifiedTime(updatedBudgetDTO.getModifiedTime());
-            }
+            existingBudget.setModifiedTime(ZonedDateTime.now(ZoneId.of("UTC")));
 
             if(updatedBudgetDTO.getCategoryId() instanceof Long) {
                 existingBudget.setCategory(categoryRepository.findCategoryById(updatedBudgetDTO.getCategoryId()));
@@ -113,6 +108,15 @@ public class BudgetService {
 
         BudgetDTO budgetDTO = mapper.map(budget, BudgetDTO.class);
         budgetDTO.setCategoryId(budget.getCategory().getCategoryId());
+
+        if(budget.getCreatedTime() instanceof ZonedDateTime) {
+            ZonedDateTime createdTime = budget.getCreatedTime();
+            budgetDTO.setCreatedTime(createdTime.withZoneSameInstant(ZoneId.systemDefault()));
+        }
+        if(budget.getModifiedTime() instanceof ZonedDateTime) {
+            ZonedDateTime modifiedTime = budget.getModifiedTime();
+            budgetDTO.setModifiedTime(modifiedTime.withZoneSameInstant(ZoneId.systemDefault()));
+        }
         return budgetDTO;
     }
 
@@ -120,13 +124,19 @@ public class BudgetService {
 
         Budget budget = mapper.map(budgetDTO, Budget.class);
         budget.setCategory(categoryRepository.findCategoryById(budgetDTO.getCategoryId()));
+        budget.setCreatedTime(ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()));
+        budget.setModifiedTime(ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()));
+
+        if(budget.getIsActive() == null) {
+            budget.setIsActive(true);
+        }
         return budget;
     }
 
     public boolean validateBigDecimal(BigDecimal bigDecimal,int range,int precision) {
 
         String str = bigDecimal.toString();
-        String arr[] = str.split(".");
+        String arr[] = str.split("\\.");
         if(arr[0].length() <= range-precision && (arr.length >= 1 && arr[1].length() <= precision)) {
             return true;
         }

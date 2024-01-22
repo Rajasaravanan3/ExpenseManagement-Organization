@@ -1,6 +1,7 @@
 package com.example.demo.ExpenseManagement.Service;
 
 import org.dozer.DozerBeanMapper;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class OrganizationService {
     private OrganizationRepository organizationRepository;
 
     @Autowired
-    private DozerBeanMapper mapper;
+    private ModelMapper mapper;
 
     @Autowired
     private AddressService addressService;

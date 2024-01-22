@@ -9,7 +9,7 @@ import com.example.demo.ExpenseManagement.Entity.Budget;
 
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
     
-    @Query("Select b from Budget b where b.budgetId  = : budgetId")
+    @Query("Select b from Budget b where b.budgetId  = :budgetId")
     Budget findBudgetById(@Param("budgetId") Long budgetId);
 
     @Query("Select b from Budget b inner join b.category c where c.categoryId = :categoryId")

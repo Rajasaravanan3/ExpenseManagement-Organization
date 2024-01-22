@@ -8,6 +8,7 @@ import java.util.List;
 import java.math.BigDecimal;
 
 import com.example.demo.ExpenseManagement.Entity.Expense;
+import com.example.demo.ExpenseManagement.Entity.User;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     
@@ -38,17 +39,26 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("Select e from Expense e inner join e.paymentMethod p where p.paymentMethodName = :paymentMethodName")
     List<Expense> findByPaymentMethodName(@Param("paymentMethodName") String paymentMethodName);
-
+    
     @Query("Select e from Expense e order by e.amount desc")
     List<Expense> findByAmount();
 
+
+    // admin accesss -> first check if user is an admin
+    //list all users
+    @Query("Select e from Expense e inner join e.user u where u.userId = :userId")
+    List<Expense> findAllExpensesByUser(@Param("userId") Long userId);
+    //can modify approver, category, budget -> do it in service
+
+
+    //approver's access -> check if user is approver
+    //list all expenses by recent date
     @Query("Select e from Expense e order by e.expenseDate desc")
     List<Expense> findByDate();
-
-
-    // admin accesss
-
-
-    //approver's access
-
+    //filter list by approval status
+    @Query("Select e from Expense e where e.approvalStatus = :approvalStatus")
+    List<Expense> getExpensesByStatus(@Param("approvalStatus") String approvalStatus);
+    //only approver can modify expense approval status
+    @Query("Update Expense e set e.approvalStatus = :approvalStatus")
+    void updateApprovalStatus(@Param("approvalStatus") String approvalStatus);
 }

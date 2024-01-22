@@ -29,6 +29,9 @@ public class Expense {
     @Column(name = "expense_description")
     private String expenseDescription;
 
+    @Column(name = "approval_status")
+    private String approvalStatus;
+
     @OneToOne
     @JoinColumn(name = "category_id", referencedColumnName = "category_id")
     private Category category;
@@ -48,16 +51,19 @@ public class Expense {
     public Expense() {}
 
     public Expense(Long expenseId, BigDecimal amount, ZonedDateTime expenseDate, String expenseDescription,
-            Category category, Currency currency, PaymentMethod paymentMethod, User user) {
+            String approvalStatus, Category category, Currency currency, PaymentMethod paymentMethod, User user) {
         this.expenseId = expenseId;
         this.amount = amount;
         this.expenseDate = expenseDate;
         this.expenseDescription = expenseDescription;
+        this.approvalStatus = approvalStatus;
         this.category = category;
         this.currency = currency;
         this.paymentMethod = paymentMethod;
         this.user = user;
     }
+
+
 
     public Long getExpenseId() {
         return expenseId;
@@ -89,6 +95,14 @@ public class Expense {
 
     public void setExpenseDescription(String expenseDescription) {
         this.expenseDescription = expenseDescription;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 
     public Category getCategory() {

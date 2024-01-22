@@ -13,6 +13,8 @@ public class ExpenseDTO {
 
     private String expenseDescription;
 
+    private String approvalStatus;
+
     private Long categoryId;
 
     private Integer currencyId;
@@ -24,11 +26,12 @@ public class ExpenseDTO {
     public ExpenseDTO() {}
 
     public ExpenseDTO(Long expenseId, BigDecimal amount, ZonedDateTime expenseDate, String expenseDescription,
-            Long categoryId, Integer currencyId, Integer paymentMethodId, Long userId) {
+            String approvalStatus, Long categoryId, Integer currencyId, Integer paymentMethodId, Long userId) {
         this.expenseId = expenseId;
         this.amount = amount;
         this.expenseDate = expenseDate;
         this.expenseDescription = expenseDescription;
+        this.approvalStatus = approvalStatus;
         this.categoryId = categoryId;
         this.currencyId = currencyId;
         this.paymentMethodId = paymentMethodId;
@@ -65,6 +68,14 @@ public class ExpenseDTO {
 
     public void setExpenseDescription(String expenseDescription) {
         this.expenseDescription = expenseDescription;
+    }
+
+    public String getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(String approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 
     public Long getCategoryId() {
