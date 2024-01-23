@@ -1,6 +1,8 @@
 package com.example.demo.ExpenseManagement.Service;
 
 
+import java.util.List;
+import java.util.ArrayList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,42 @@ public class UserService {
         }
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while retrieving user by Id "+ userId);
+        }
+    }
+
+    public List<UserDTO> getUsersByRoleName(Long organizationId, String roleName) {
+        List<User> users = new ArrayList<>();
+        List<UserDTO> userDTOList = new ArrayList<>();
+        try {
+            users = userRepository.getusersByRoleName(organizationId, roleName);
+            if(users == null) {
+                throw new ValidationException("No user found in the role " + roleName +" working for the organization id " + organizationId, null);
+            }
+
+            for (User user : users) {
+                userDTOList.add(this.mapUserToUserDTO(user));
+            }
+            return userDTOList;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occured while retrieving users working as " + roleName + " in the organization id " + organizationId);
+        }
+    }
+
+    public UserDTO getUserByEmail(String userEmail) {
+        User user = null;
+        try {
+            user = userRepository.findByUserEmail(userEmail);
+            return this.mapUserToUserDTO(user);
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occured while retrieving user with email " + userEmail);
         }
     }
 
@@ -119,14 +157,14 @@ public class UserService {
 
                 existingUser.setOrganization(organizationRepository.findOrganizationById(updatedUserDTO.getOrganizationId()));
             }
-            userRepository.save(existingUser);
+            userRepository.saveAndFlush(existingUser);
         }
         catch (ValidationException e) {
             throw e;
         }
-        // catch (Exception e) {
-        //     throw new ApplicationException("An unexpected error occurred while updating.");
-        // }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while updating.");
+        }
     }
 
     public UserDTO mapUserToUserDTO(User user) {

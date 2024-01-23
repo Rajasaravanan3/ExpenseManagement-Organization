@@ -75,11 +75,11 @@ public class RoleService {
                 existingRole.setRoleDescription(updatedRole.getRoleDescription());
             }
 
-            if(updatedRole.getIsActive() instanceof Boolean){
+            if(updatedRole.getIsApprover() instanceof Boolean){
 
-                existingRole.setIsActive(updatedRole.getIsActive());
+                existingRole.setIsApprover(updatedRole.getIsApprover());
             }
-            roleRepository.save(existingRole);
+            roleRepository.saveAndFlush(existingRole);
         }
         catch (ValidationException e) {
             throw e;

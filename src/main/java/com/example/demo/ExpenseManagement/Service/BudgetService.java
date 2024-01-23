@@ -94,7 +94,7 @@ public class BudgetService {
             if(updatedBudgetDTO.getCategoryId() instanceof Long) {
                 existingBudget.setCategory(categoryRepository.findCategoryById(updatedBudgetDTO.getCategoryId()));
             }
-            budgetRepository.save(existingBudget);
+            budgetRepository.saveAndFlush(existingBudget);
         }
         catch (ValidationException e) {
             throw e;
@@ -125,7 +125,7 @@ public class BudgetService {
         Budget budget = mapper.map(budgetDTO, Budget.class);
         budget.setCategory(categoryRepository.findCategoryById(budgetDTO.getCategoryId()));
         budget.setCreatedTime(ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()));
-        budget.setModifiedTime(ZonedDateTime.now().withZoneSameInstant(ZoneId.systemDefault()));
+        budget.setModifiedTime(ZonedDateTime.now(ZoneId.of("UTC")));
 
         if(budget.getIsActive() == null) {
             budget.setIsActive(true);

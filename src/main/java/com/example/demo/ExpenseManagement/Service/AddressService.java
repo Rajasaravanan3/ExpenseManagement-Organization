@@ -90,7 +90,7 @@ public class AddressService {
                     throw new ValidationException("Provide a valid Zip code", HttpStatus.BAD_REQUEST);
                 existingAddress.setZipCode(updatedAddress.getZipCode());
             }
-            addressRepository.save(existingAddress);
+            addressRepository.saveAndFlush(existingAddress);
         }
         catch (ValidationException e) {
             throw e;

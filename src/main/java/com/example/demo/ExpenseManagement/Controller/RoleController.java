@@ -33,10 +33,10 @@ public class RoleController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<Void> updateRole(@RequestBody Role role) {
+    // @PutMapping
+    // public ResponseEntity<Void> updateRole(@RequestBody Role role) {
 
-        roleService.updateRole(role);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    //     roleService.updateRole(role);
+    //     return new ResponseEntity<>(HttpStatus.OK);
+    // }
 }

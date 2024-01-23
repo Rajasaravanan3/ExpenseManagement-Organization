@@ -4,5 +4,5 @@ public enum BudgetType {
     
     WEEKLY,
     MONTHLY,
-    YEARLY
+    ANNUAL
 }

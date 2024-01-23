@@ -3,12 +3,14 @@ package com.example.demo.ExpenseManagement.Entity;
 import java.time.ZonedDateTime;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
+@Entity
 public class Approvals {
     
     @Id
@@ -21,15 +23,15 @@ public class Approvals {
 
     @OneToOne
     @JoinColumn(name = "approved_by", referencedColumnName = "user_id")
-    private Long approvedBy;
+    private User approvedBy;
 
     @OneToOne
     @JoinColumn(name = "expense_id", referencedColumnName = "expense_id")
-    private Long expense;
+    private Expense expense;
 
     public Approvals() {}
 
-    public Approvals(Long approvalId, ZonedDateTime approvedDate, Long approvedBy, Long expense) {
+    public Approvals(Long approvalId, ZonedDateTime approvedDate, User approvedBy, Expense expense) {
         this.approvalId = approvalId;
         this.approvedDate = approvedDate;
         this.approvedBy = approvedBy;
@@ -52,19 +54,19 @@ public class Approvals {
         this.approvedDate = approvedDate;
     }
 
-    public Long getApprovedBy() {
+    public User getApprovedBy() {
         return approvedBy;
     }
 
-    public void setApprovedBy(Long approvedBy) {
+    public void setApprovedBy(User approvedBy) {
         this.approvedBy = approvedBy;
     }
 
-    public Long getExpenseId() {
+    public Expense getExpense() {
         return expense;
     }
 
-    public void setExpenseId(Long expense) {
+    public void setExpense(Expense expense) {
         this.expense = expense;
     }
     

@@ -15,7 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.ExpenseManagement.DTO.ApprovalsDTO;
+import com.example.demo.ExpenseManagement.DTO.BudgetDTO;
+import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
+import com.example.demo.ExpenseManagement.DTO.UserDTO;
+import com.example.demo.ExpenseManagement.Service.ApprovalsService;
 import com.example.demo.ExpenseManagement.Service.ExpenseService;
 
 @RestController
@@ -24,6 +29,9 @@ public class ExpenseController {
 
     @Autowired
     private ExpenseService expenseService;
+
+    @Autowired
+    private ApprovalsService approvalsService;
     
     @GetMapping("/{expenseId}")
     public ResponseEntity<ExpenseDTO> getExpenseById(@PathVariable("expenseId") Long expenseId) {
@@ -39,41 +47,34 @@ public class ExpenseController {
         return new ResponseEntity<>(notificationMessage, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{expenseId}/{approvalStatus}")
-    public ResponseEntity<String> updateExpense(@RequestParam("expenseId") Long expenseId,@RequestParam("approvalStatus") String approvalStatus) {
+    @DeleteMapping
+    public ResponseEntity<Void> deleteExpense(@RequestParam("expenseId") Long expenseId, @RequestParam("userId") Long userId) {
 
-        String notificationMessage = expenseService.updateExpense(expenseId, approvalStatus);
-        return new ResponseEntity<>(notificationMessage, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{expenseId}/{userId}")
-    public ResponseEntity<Void> deleteExpense(@RequestParam("expenseId") Long expenseId,@RequestParam("userId") Long userId) {
-
-        //write service method
+        expenseService.deleteExpense(expenseId, userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
 
 
-    //filters
+    //expense filters
 
     // get expenses by category name
-    @GetMapping("/filters/{categoryName}")
-    public ResponseEntity<List<ExpenseDTO>> getExpensesByCategoryName(@RequestParam("categoryName") String categoryName) {
+    @GetMapping("/filters/category-name")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByCategoryName(@RequestParam("organizationId") Long organizationId, @RequestParam("categoryName") String categoryName) {
         
-        List<ExpenseDTO> expenseDTOList = expenseService.getByCategoryName(categoryName);
+        List<ExpenseDTO> expenseDTOList = expenseService.getByCategoryName(organizationId, categoryName);
         if(expenseDTOList != null) {
-            return new ResponseEntity<>(expenseService.getByCategoryName(categoryName), HttpStatus.OK);
+            return new ResponseEntity<>(expenseService.getByCategoryName(organizationId, categoryName), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     // get expense list by amount higher to lower
     @GetMapping("/filters/amount-spent")
-    public ResponseEntity<List<ExpenseDTO>> getByAmountSpentHigherToLower() {
+    public ResponseEntity<List<ExpenseDTO>> getByAmountSpentHigherToLower(@RequestParam("organizationId") Long organizationId) {
 
-        List<ExpenseDTO> expenseDTOList = expenseService.getByAmountSpentHigherToLower();
+        List<ExpenseDTO> expenseDTOList = expenseService.getByAmountSpentHigherToLower(organizationId);
         if(expenseDTOList != null) {
             return new ResponseEntity<>(expenseDTOList, HttpStatus.OK);
         }
@@ -81,21 +82,32 @@ public class ExpenseController {
     }
 
     //get expenses by currency code
-    @GetMapping("/filters/{currencyCode}")
-    public ResponseEntity<List<ExpenseDTO>> getExpensesByCurrencyCode(@RequestParam("currencyCode") String currencyCode) {
+    @GetMapping("/filters/currency-Code")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByCurrencyCode(@RequestParam("organizationId") Long organizationId, @RequestParam("currencyCode") String currencyCode) {
         
-        List<ExpenseDTO> expenseDTOList = expenseService.getByCurrencyCode(currencyCode);
+        List<ExpenseDTO> expenseDTOList = expenseService.getByCurrencyCode(organizationId, currencyCode);
         if(expenseDTOList != null) {
-            return new ResponseEntity<>(expenseService.getByCurrencyCode(currencyCode), HttpStatus.OK);
+            return new ResponseEntity<>(expenseDTOList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    //get expenses by userId
+    @GetMapping("/filters/user/{userId}")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByUserId(@PathVariable("userId") Long userId) {
+        
+        List<ExpenseDTO> expenseDTOList = expenseService.getExpensesByUserId(userId);
+        if(expenseDTOList != null) {
+            return new ResponseEntity<>(expenseDTOList, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     //get expenses by payment method name
-    @GetMapping("/filters/{paymentMethodName}")
-    public ResponseEntity<List<ExpenseDTO>> getExpensesByPaymentMethodName(@RequestParam("paymentMethodName") String paymentMethodName) {
+    @GetMapping("/filters/payment-Method-name")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByPaymentMethodName(@RequestParam("organizationId") Long organizationId, @RequestParam("paymentMethodName") String paymentMethodName) {
         
-        List<ExpenseDTO> expenseDTOList = expenseService.getByPaymentMethodName(paymentMethodName);
+        List<ExpenseDTO> expenseDTOList = expenseService.getByPaymentMethodName(organizationId, paymentMethodName);
         if(expenseDTOList != null) {
             return new ResponseEntity<>(expenseDTOList, HttpStatus.OK);
         }
@@ -108,24 +120,93 @@ public class ExpenseController {
     //admin's access
 
     //get expenses by other's userId
-    @GetMapping("/admin/{adminId}{userId}")
-    public ResponseEntity<List<ExpenseDTO>> getExpensesByUserId(@RequestParam("adminId") Long adminId, @RequestParam("userId") Long userId) {
+    @GetMapping("/admin/{adminId}/users/role")
+    public ResponseEntity<List<UserDTO>> getUsersByRoleName(@PathVariable("adminId") Long adminId, @RequestParam("organizationId") Long organizationId, @RequestParam("roleName") String roleName) {
         
-        List<ExpenseDTO> expenseDTOList = expenseService.getExpensesByUserId(adminId, userId);
-        if(expenseDTOList != null) {
-            return new ResponseEntity<>(expenseDTOList, HttpStatus.OK);
+        List<UserDTO> userDTOList = expenseService.getUsersByRoleName(organizationId, adminId, roleName);
+        if(userDTOList != null) {
+            return new ResponseEntity<>(userDTOList, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    
-    // @GetMapping("/recent-expenses")
-    // public ResponseEntity<List<ExpenseDto>> getByRecentExpenses() {
+    //get users working for the organization
+    @GetMapping("/admin/{adminId}/users")
+    public ResponseEntity<List<UserDTO>> getAllUsers(@PathVariable("adminId") Long adminId, @RequestParam("organizationId") Long organizationId) {
+        
+        List<UserDTO> userDTOList = expenseService.getAllUsers(organizationId, adminId);
+        if(userDTOList != null) {
+            return new ResponseEntity<>(userDTOList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
-    //     List<ExpenseDto> expenseDtoList = expenseService.getByRecentExpenses();
-    //     if(expenseDtoList != null) {
-    //         return new ResponseEntity<>(expenseDtoList, HttpStatus.OK);
-    //     }
-    //     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    // }
+    //get all approvals done by an user(approver)
+    @GetMapping("/admin/{adminId}/approvals")
+    public ResponseEntity<List<ApprovalsDTO>> getAllApprovalsByUser(@PathVariable("adminId") Long adminId, @RequestParam("userId") Long userId) {
+        
+        List<ApprovalsDTO> approvalsDTOList = expenseService.getApprovalsByApprovedUserId(adminId, userId);
+        if(approvalsDTOList != null) {
+            return new ResponseEntity<>(approvalsDTOList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    //update category
+    @PutMapping("/admin/{adminId}")
+    public ResponseEntity<Void> updateCategory(@PathVariable("adminId") Long adminId, @RequestBody CategoryDTO categoryDTO) {
+
+        expenseService.updateCategory(adminId, categoryDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //update budget
+    @PutMapping("/admin/{adminId}/budget")
+    public ResponseEntity<Void> updateBudget(@PathVariable("adminId") Long adminId, @RequestBody BudgetDTO budgetDTO) {
+
+        expenseService.updateBudget(adminId, budgetDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    //update approver
+    @PutMapping("/admin/{adminId}/approver")
+    public ResponseEntity<Void> updateApprover(@PathVariable("adminId") Long adminId, @RequestParam("roleId") Long roleId, @RequestParam("isApprover") Boolean isApprover) {
+
+        expenseService.updateApprover(adminId, roleId, isApprover);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+
+    //approver's accesss
+    
+    //get recent expenses for the organization
+    @GetMapping("/approver/{approverId}/recent-expenses")
+    public ResponseEntity<List<ExpenseDTO>> getByRecentExpenses(@PathVariable("approverId") Long approverId, @RequestParam("organizationId") Long organizationId) {
+
+        List<ExpenseDTO> expenseDtoList = expenseService.getRecentExpenses(approverId, organizationId);
+        if(expenseDtoList != null) {
+            return new ResponseEntity<>(expenseDtoList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    //get expenses by approval status
+    @GetMapping("/approver/{approverId}/approval-status")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByStatus(@PathVariable("approverId") Long approverId, @RequestParam("organizationId") Long organizationId, @RequestParam("approvalStatus") String approvalStatus) {
+
+        List<ExpenseDTO> expenseDtoList = expenseService.getExpensesByStatus(approverId, organizationId, approvalStatus);
+        if(expenseDtoList != null) {
+            return new ResponseEntity<>(expenseDtoList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    //update approval status -> after approving or rejecting the expense
+    @PutMapping("/approver/{approverId}/approval-status")
+    public ResponseEntity<Void> updateApprovalStatus(@PathVariable("approverId") Long approverId, @RequestParam("expenseId") Long expenseId, @RequestParam("approvalStatus") String approvalStatus) {
+
+        expenseService.updateApprovalStatus(approverId, expenseId, approvalStatus);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

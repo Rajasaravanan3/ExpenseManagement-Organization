@@ -1,6 +1,5 @@
-package com.example.demo.ExpenseManagement.Service.DozerBeanMapper;
+package com.example.demo.ExpenseManagement.Service.ModelMapper;
 
-import org.dozer.DozerBeanMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

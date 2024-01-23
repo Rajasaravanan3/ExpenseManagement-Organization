@@ -28,17 +28,11 @@ public class BudgetController {
         return new ResponseEntity<>(budgetDTO, HttpStatus.OK);
     }
 
+    // change to only admin can add budget
     @PostMapping
     public ResponseEntity<Void> addBudget(@RequestBody BudgetDTO budgetDTO) {
 
         budgetService.addBudget(budgetDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PutMapping
-    public ResponseEntity<Void> updateBudget(@RequestBody BudgetDTO budgetDTO) {
-
-        budgetService.updateBudget(budgetDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

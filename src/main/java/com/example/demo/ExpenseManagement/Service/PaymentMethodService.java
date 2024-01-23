@@ -74,7 +74,7 @@ public class PaymentMethodService {
                 }
                 existingPaymentMethod.setPaymentMethodDescription(updatedPaymentMethod.getPaymentMethodDescription());
             }
-            paymentMethodRepository.save(existingPaymentMethod);
+            paymentMethodRepository.saveAndFlush(existingPaymentMethod);
         }
         catch (ValidationException e) {
             throw e;

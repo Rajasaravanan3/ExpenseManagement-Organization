@@ -9,11 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
+import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Entity.Category;
+import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.CategoryRepository;
 import com.example.demo.ExpenseManagement.Repository.OrganizationRepository;
+import com.example.demo.ExpenseManagement.Repository.UserRepository;
 
 @Service
 public class CategoryService {
@@ -26,6 +29,9 @@ public class CategoryService {
 
     @Autowired
     private OrganizationRepository organizationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public CategoryDTO getCategoryById(Long categoryId) {
         
@@ -69,6 +75,7 @@ public class CategoryService {
     }
 
     public void updateCategory(CategoryDTO updatedCategoryDTO) {
+
         Category existingCategory = null;
         try {
             existingCategory = categoryRepository.findCategoryById(updatedCategoryDTO.getCategoryId());
@@ -101,7 +108,7 @@ public class CategoryService {
             if(updatedCategoryDTO.getOrganizationId() instanceof Long) {
                 existingCategory.setOrganization(organizationRepository.findOrganizationById(updatedCategoryDTO.getOrganizationId()));
             }
-            categoryRepository.save(existingCategory);
+            categoryRepository.saveAndFlush(existingCategory);
         }
         catch (ValidationException e) {
             throw e;

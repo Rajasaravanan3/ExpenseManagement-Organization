@@ -73,7 +73,7 @@ public class CurrencyService {
                 }
                 existingCurrency.setCurrencyName(updatedCurrency.getCurrencyName());
             }
-            currencyRepository.save(existingCurrency);
+            currencyRepository.saveAndFlush(existingCurrency);
         }
         catch (ValidationException e) {
             throw e;

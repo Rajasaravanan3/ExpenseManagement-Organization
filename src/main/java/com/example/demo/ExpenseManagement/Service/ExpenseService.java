@@ -11,9 +11,14 @@ import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+import com.example.demo.ExpenseManagement.DTO.ApprovalsDTO;
+import com.example.demo.ExpenseManagement.DTO.BudgetDTO;
+import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
+import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Entity.Budget;
 import com.example.demo.ExpenseManagement.Entity.Expense;
+import com.example.demo.ExpenseManagement.Entity.Role;
 import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
@@ -35,7 +40,13 @@ public class ExpenseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private CurrencyService currencyService;
@@ -45,6 +56,15 @@ public class ExpenseService {
 
     @Autowired
     private BudgetRepository budgetRepository;
+
+    @Autowired
+    private BudgetService budgetService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private ApprovalsService approvalsService;
     
     public ExpenseDTO getExpenseById(Long expenseId) {
         
@@ -96,68 +116,12 @@ public class ExpenseService {
         }
     }
 
-    public String updateExpense(Long expenseId, String approvalStatus) {
-        
-        Expense existingExpense = null;
-        String notification = "";
-        try {
-            existingExpense = expenseRepository.findExpenseById(expenseId);
-            if(existingExpense == null) {
-                throw new ValidationException("No record found to update for the expense id " + expenseId, HttpStatus.NOT_FOUND);
-            }
-            if(approvalStatus instanceof String && !(approvalStatus.isEmpty() || approvalStatus.length() > 15)) {
-                existingExpense.setApprovalStatus(approvalStatus);
-            }
-            else {
-                throw new ValidationException("Invalid approval status", HttpStatus.BAD_REQUEST);
-            }
-            // if(updatedExpenseDTO.getAmount() instanceof BigDecimal && validateBigDecimal(updatedExpenseDTO.getAmount(), 10, 2)) {
-            //     existingExpense.setAmount(updatedExpenseDTO.getAmount());
-
-            //     notification = this.validateExpenseAmount(updatedExpenseDTO.getCategoryId(), existingExpense.getAmount(), updatedExpenseDTO.getAmount());
-                
-            //     if(!notification.isEmpty())
-            //         return notification;
-            // }
-
-            // if(updatedExpenseDTO.getExpenseDate() instanceof ZonedDateTime) {
-            //     existingExpense.setExpenseDate(updatedExpenseDTO.getExpenseDate());
-            // }
-            // if(updatedExpenseDTO.getExpenseDescription() instanceof String && !updatedExpenseDTO.getExpenseDescription().isEmpty()) {
-            //     if(updatedExpenseDTO.getExpenseDescription().length() > 1000) {
-            //         throw new ValidationException("Expense description must not exceed 1000 characters", HttpStatus.BAD_REQUEST);
-            //     }
-            //     existingExpense.setExpenseDescription(updatedExpenseDTO.getExpenseDescription());
-            // }
-            // if(updatedExpenseDTO.getCategoryId() instanceof Long) {
-            //     existingExpense.setCategory(categoryRepository.findCategoryById(updatedExpenseDTO.getCategoryId()));
-            // }
-            // if(updatedExpenseDTO.getCurrencyId() instanceof Integer) {
-            //     existingExpense.setCurrency(currencyService.getCurrencyById(updatedExpenseDTO.getCurrencyId()));
-            // }
-            // if(updatedExpenseDTO.getPaymentMethodId() instanceof Integer) {
-            //     existingExpense.setPaymentMethod(paymentMethodService.getPaymentMethodById(updatedExpenseDTO.getPaymentMethodId()));
-            // }
-            // if(updatedExpenseDTO.getUserId() instanceof Long) {
-            //     existingExpense.setUser(userRepository.findUserById(updatedExpenseDTO.getUserId()));
-            // }
-            expenseRepository.save(existingExpense);
-            return "Updated Successfully";
-        }
-        catch (ValidationException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            throw new ApplicationException("An unexpected error occurred while updating expense.");
-        }
-    }
-
     public void deleteExpense(long expenseId, Long userId) {
 
         Expense existingExpense = null;
         try {
             existingExpense = expenseRepository.findExpenseById(expenseId);
-            if(this.getExpenseById(expenseId) != null) {
+            if(this.getExpenseById(expenseId) != null && existingExpense.getUser().getUserId().equals(userId)) {
                 expenseRepository.deleteById(expenseId);
             }
         }
@@ -228,7 +192,7 @@ public class ExpenseService {
 
         for (Budget budget : budgets) {
                 
-            if(String.valueOf(budget.getBudgetType()).equalsIgnoreCase("YEARLY") && budget.getBudgetAmount().compareTo(lastOneYearExpenses) < 0) {
+            if(String.valueOf(budget.getBudgetType()).equalsIgnoreCase("ANNUAL") && budget.getBudgetAmount().compareTo(lastOneYearExpenses) < 0) {
                 message = "You can't place this expense as it exceeds annual budget limit for this category id " + categoryId;
                 break;
             }
@@ -260,13 +224,13 @@ public class ExpenseService {
         return expenseRepository.findSumOfLastOneYearExpenses(categoryId);
     }
 
+
     //filters
-    public List<ExpenseDTO> getByAmountSpentHigherToLower() {
+    public List<ExpenseDTO> getByAmountSpentHigherToLower(Long organizationId) {
         
         List<Expense> expenseList = null;
-        List<ExpenseDTO> expenseDTOList = null;
         try {
-            expenseList = expenseRepository.findByAmount();
+            expenseList = expenseRepository.findByAmount(organizationId);
             
             return this.getExpenses(expenseList, "No expenses found");
         }
@@ -275,12 +239,12 @@ public class ExpenseService {
         }
     }
 
-    public List<ExpenseDTO> getByCategoryName(String categoryName) {
+    public List<ExpenseDTO> getByCategoryName(Long organizationId, String categoryName) {
 
         List<Expense> expenseList = null;
 
         try {
-            expenseList = expenseRepository.findByCategoryName(categoryName);
+            expenseList = expenseRepository.findByCategoryName(organizationId, categoryName);
 
             String notFoundMessage = "No expense found for the category name " + categoryName;
             return this.getExpenses(expenseList, notFoundMessage);
@@ -290,11 +254,11 @@ public class ExpenseService {
         }
     }
 
-    public List<ExpenseDTO> getByCurrencyCode(String currencyCode) {
+    public List<ExpenseDTO> getByCurrencyCode(Long organizationId, String currencyCode) {
 
         List<Expense> expenseList = null;
         try {
-            expenseList = expenseRepository.findByCurrencyCode(currencyCode);
+            expenseList = expenseRepository.findByCurrencyCode(organizationId, currencyCode);
 
             String notFoundMessage = "No expense found for the currency code " + currencyCode;
             return this.getExpenses(expenseList, notFoundMessage);
@@ -304,11 +268,25 @@ public class ExpenseService {
         }
     }
 
-    public List<ExpenseDTO> getByPaymentMethodName(String paymentMethodName) {
+    public List<ExpenseDTO> getExpensesByUserId(Long userId) {
 
         List<Expense> expenseList = null;
         try {
-            expenseList = expenseRepository.findByPaymentMethodName(paymentMethodName);
+            expenseList = expenseRepository.findExpensesByUserId(userId);
+            
+            String notFoundMessage = "No expense found";
+            return this.getExpenses(expenseList, notFoundMessage);
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving recent expenses");
+        }
+    }
+
+    public List<ExpenseDTO> getByPaymentMethodName(Long organizationId, String paymentMethodName) {
+
+        List<Expense> expenseList = null;
+        try {
+            expenseList = expenseRepository.findByPaymentMethodName(organizationId, paymentMethodName);
 
             String notFoundMessage = "No expense found for the paymentMethod Name " + paymentMethodName;
             return this.getExpenses(expenseList, notFoundMessage);
@@ -320,26 +298,163 @@ public class ExpenseService {
 
 
     // admin's access
-    public List<ExpenseDTO> getExpensesByUserId(Long adminId, Long userId) {
 
-        User user = null;
-        List<Expense> expenseList = null;
+    //admin can update category, approver, budget
+    public void updateCategory(Long adminId, CategoryDTO categoryDTO) {
+
+        if(isAdmin(adminId)) {
+            categoryService.updateCategory(categoryDTO);
+        }
+    }
+
+    public void updateBudget(Long adminId, BudgetDTO budgetDTO) {
+
+        if(isAdmin(adminId)) {
+            budgetService.updateBudget(budgetDTO);
+        }
+    }
+
+    public void updateApprover(Long adminId, Long roleId, Boolean approverStatus) {
+
+        Role role = null;
+        if(isAdmin(adminId)) {
+            
+            role = roleService.getRoleById(roleId);
+            role.setIsApprover(approverStatus);
+        }
+    }
+
+    public List<UserDTO> getUsersByRoleName(Long adminId, Long organizationId, String roleName) {
+
+        List<UserDTO> users = new ArrayList<>();
+        if(isAdmin(adminId)) {
+            users = userService.getUsersByRoleName(organizationId, roleName);
+        }
+        return users;
+    }
+
+    public List<ApprovalsDTO> getApprovalsByApprovedUserId(Long adminId, Long userId) {
+        List<ApprovalsDTO> approvalsDTOs = null;
+        if(isAdmin(adminId)) {
+            approvalsDTOs = approvalsService.getApprovalsByApprovedUser(userId);
+        }
+        return approvalsDTOs;
+    }
+
+    public List<UserDTO> getAllUsers(Long adminId, Long organizationId) {
+
+        List<User> users = new ArrayList<>();
+        List<UserDTO> userDTOList = new ArrayList<>();
         try {
-            user = userRepository.findUserById(userId);
-
-            if(user != null && user.getRole().getRoleName().equalsIgnoreCase("admin")) {
-
-                expenseList = expenseRepository.findAllExpensesByUser(userId);
+            if(isAdmin(adminId)) {
+                users = userRepository.findAllUsers(organizationId);
+                for (User user : users) {
+                    userDTOList.add(userService.mapUserToUserDTO(user));
+                }
             }
-            else{
+            return userDTOList;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving all users working for the organization" + organizationId);
+        }
+    }
+
+    public boolean isAdmin(Long adminId) {
+        User admin = null;
+        try {
+            admin = userRepository.findUserById(adminId);
+            if(admin != null && admin.getRole().getRoleName().equalsIgnoreCase("admin")) {
+                return true;
+            }
+            else {
                 throw new ValidationException("Access denied", HttpStatus.FORBIDDEN);
             }
-            String notFoundMessage = "No expense found for the user id " + userId;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occured while verifying admin");
+        }
+    }
+
+
+
+    //approver's access
+    public List<ExpenseDTO> getRecentExpenses(Long approverId, Long organizationId) {
+
+        List<Expense> expenseList = null;
+        try {
+            if(isApprover(approverId)) {
+                expenseList = expenseRepository.findByDate(organizationId);
+            }
+            
+            String notFoundMessage = "No expense found";
             return this.getExpenses(expenseList, notFoundMessage);
         }
         catch (Exception e) {
-            throw new ApplicationException("An unexpected error occurred while retrieving expenses by user id " + userId);
+            throw new ApplicationException("An unexpected error occurred while retrieving recent expenses");
         }
     }
-    //admin can update category, approver, budget
+
+    public List<ExpenseDTO> getExpensesByStatus(Long approverId, Long organizationId, String approvalStatus) {
+        
+        List<Expense> expenseList = new ArrayList<>();
+        List<ExpenseDTO> expenseDTOList = new ArrayList<>();
+        try {
+            if(isApprover(approverId)) {
+                expenseList = expenseRepository.findExpensesByStatus(organizationId, approvalStatus);
+                expenseDTOList = this.getExpenses(expenseList, "No expenses found with the approval status " + approvalStatus);
+            }
+            return expenseDTOList;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while updating expense.");
+        }
+    }
+    
+    public void updateApprovalStatus(Long approverId, Long expenseId, String approvalStatus) {
+        
+        Expense existingExpense = null;
+        try {
+            if(isApprover(approverId) && this.getExpenseById(expenseId) != null) {
+
+                existingExpense = expenseRepository.findExpenseById(expenseId);
+
+                if(approvalStatus instanceof String && !(approvalStatus.isEmpty() || approvalStatus.length() > 15)) {
+                    existingExpense.setApprovalStatus(approvalStatus);
+                    approvalsService.addApproval(approverId, expenseId);
+                }
+                else {
+                    throw new ValidationException("Invalid approval status", HttpStatus.BAD_REQUEST);
+                }
+            }
+            expenseRepository.saveAndFlush(existingExpense);
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while updating expense.");
+        }
+    }
+    
+    public boolean isApprover(Long userId) {
+        User approver = null;
+        try {
+            approver = userRepository.findUserById(userId);
+            if(approver != null && approver.getRole().getIsApprover()) {
+                return true;
+            }
+            else {
+                throw new ValidationException("Access denied", HttpStatus.FORBIDDEN);
+            }
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("an unexpected error occured while verifying approver");
+        }
+    }
 }

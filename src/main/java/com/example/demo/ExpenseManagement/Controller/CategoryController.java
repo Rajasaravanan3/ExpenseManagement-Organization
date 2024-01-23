@@ -34,11 +34,4 @@ public class CategoryController {
         categoryService.addCategory(categoryDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
-
-    @PutMapping
-    public ResponseEntity<Void> updateCategory(@RequestBody CategoryDTO categoryDTO) {
-
-        categoryService.updateCategory(categoryDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }

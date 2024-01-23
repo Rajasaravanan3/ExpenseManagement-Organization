@@ -1,6 +1,5 @@
 package com.example.demo.ExpenseManagement.Service;
 
-import org.dozer.DozerBeanMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -97,7 +96,7 @@ public class OrganizationService {
             if(updatedOrganizationDTO.getAddressId() != null) {
                 existingOrganization.setAddress(addressService.getAddressById(updatedOrganizationDTO.getAddressId()));
             }
-            organizationRepository.save(existingOrganization);
+            organizationRepository.saveAndFlush(existingOrganization);
         }
         catch (ValidationException e) {
             throw e;
