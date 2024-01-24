@@ -32,31 +32,38 @@ public class ApprovalsService {
 
     @Autowired
     private ExpenseRepository expenseRepository;
-    
-    // public ApprovalsDTO getApprovalById(Long approvalId) {
-        
-    //     Approvals approval = null;
-    //     try {
-    //         approval = approvalsRepository.findByApprovalId(approvalId);
-    //         if(approval == null) {
-    //             throw new ValidationException("No approval found for the approval id " + approvalId, HttpStatus.NOT_FOUND);
-    //         }
-    //         return this.mapApprovalsToApprovalsDTO(approval);
-    //     }
-    //     catch (ValidationException e) {
-    //         throw e;
-    //     }
-    //     catch (Exception e) {
-    //         throw new ApplicationException("An unexpected error occurred while retrieving approval by approval Id " + approvalId);
-    //     }
-    // }
 
-    public List<ApprovalsDTO> getApprovalsByApprovedUser(Long userId) {
+    @Autowired
+    private AdminVerification adminVerification;
+    
+    public ApprovalsDTO getApprovalById(Long adminId, Long approvalId) {
+        
+        Approvals approval = null;
+        try {
+            if(adminVerification.isAdmin(adminId)) {
+                approval = approvalsRepository.findByApprovalId(approvalId);
+            }
+            if(approval == null) {
+                throw new ValidationException("No approval found for the approval id " + approvalId, HttpStatus.NOT_FOUND);
+            }
+            return this.mapApprovalsToApprovalsDTO(approval);
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving approval by approval Id " + approvalId);
+        }
+    }
+
+    public List<ApprovalsDTO> getApprovalsByApprovedUserId(Long adminId, Long userId) {
         
         List<ApprovalsDTO> approvalsDTO = new ArrayList<>();
         List<Approvals> approvals = new ArrayList<>();
         try {
-            approvals = approvalsRepository.findByApprovedUser(userId);
+            if(adminVerification.isAdmin(adminId)) {
+                approvals = approvalsRepository.findByApprovedUser(userId);
+            }
             
             if(approvals == null) {
                 throw new ValidationException("No approval found for the user id " + userId, HttpStatus.NOT_FOUND);

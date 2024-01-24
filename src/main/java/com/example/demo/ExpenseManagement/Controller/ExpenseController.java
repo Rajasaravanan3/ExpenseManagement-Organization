@@ -15,11 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.ExpenseManagement.DTO.ApprovalsDTO;
-import com.example.demo.ExpenseManagement.DTO.BudgetDTO;
-import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
-import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Service.ApprovalsService;
 import com.example.demo.ExpenseManagement.Service.ExpenseService;
 
@@ -29,9 +25,6 @@ public class ExpenseController {
 
     @Autowired
     private ExpenseService expenseService;
-
-    @Autowired
-    private ApprovalsService approvalsService;
     
     @GetMapping("/{expenseId}")
     public ResponseEntity<ExpenseDTO> getExpenseById(@PathVariable("expenseId") Long expenseId) {
@@ -119,62 +112,13 @@ public class ExpenseController {
     
     //admin's access
 
-    //get expenses by other's userId
-    @GetMapping("/admin/{adminId}/users/role")
-    public ResponseEntity<List<UserDTO>> getUsersByRoleName(@PathVariable("adminId") Long adminId, @RequestParam("organizationId") Long organizationId, @RequestParam("roleName") String roleName) {
-        
-        List<UserDTO> userDTOList = expenseService.getUsersByRoleName(organizationId, adminId, roleName);
-        if(userDTOList != null) {
-            return new ResponseEntity<>(userDTOList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
     //get users working for the organization
-    @GetMapping("/admin/{adminId}/users")
-    public ResponseEntity<List<UserDTO>> getAllUsers(@PathVariable("adminId") Long adminId, @RequestParam("organizationId") Long organizationId) {
-        
-        List<UserDTO> userDTOList = expenseService.getAllUsers(organizationId, adminId);
-        if(userDTOList != null) {
-            return new ResponseEntity<>(userDTOList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
     //get all approvals done by an user(approver)
-    @GetMapping("/admin/{adminId}/approvals")
-    public ResponseEntity<List<ApprovalsDTO>> getAllApprovalsByUser(@PathVariable("adminId") Long adminId, @RequestParam("userId") Long userId) {
-        
-        List<ApprovalsDTO> approvalsDTOList = expenseService.getApprovalsByApprovedUserId(adminId, userId);
-        if(approvalsDTOList != null) {
-            return new ResponseEntity<>(approvalsDTOList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
+    // get users by roleName
     //update category
-    @PutMapping("/admin/{adminId}")
-    public ResponseEntity<Void> updateCategory(@PathVariable("adminId") Long adminId, @RequestBody CategoryDTO categoryDTO) {
-
-        expenseService.updateCategory(adminId, categoryDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     //update budget
-    @PutMapping("/admin/{adminId}/budget")
-    public ResponseEntity<Void> updateBudget(@PathVariable("adminId") Long adminId, @RequestBody BudgetDTO budgetDTO) {
-
-        expenseService.updateBudget(adminId, budgetDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-    
     //update approver
-    @PutMapping("/admin/{adminId}/approver")
-    public ResponseEntity<Void> updateApprover(@PathVariable("adminId") Long adminId, @RequestParam("roleId") Long roleId, @RequestParam("isApprover") Boolean isApprover) {
-
-        expenseService.updateApprover(adminId, roleId, isApprover);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+    
 
 
 

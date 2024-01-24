@@ -26,6 +26,7 @@ public class RoleController {
         return new ResponseEntity<>(roleService.getRoleById(roleId), HttpStatus.OK);
     }
 
+    //admin's access
     @PostMapping
     public ResponseEntity<Void> addRole(@RequestBody Role role) {
 
@@ -33,10 +34,11 @@ public class RoleController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    // @PutMapping
-    // public ResponseEntity<Void> updateRole(@RequestBody Role role) {
+    //admin's access
+    @PutMapping("/{adminId}")
+    public ResponseEntity<Void> updateApprover(@PathVariable("adminId") Long adminId, @RequestBody Role role) {
 
-    //     roleService.updateRole(role);
-    //     return new ResponseEntity<>(HttpStatus.OK);
-    // }
+        roleService.updateRole(adminId, role);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

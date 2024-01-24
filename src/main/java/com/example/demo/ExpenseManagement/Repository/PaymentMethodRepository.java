@@ -10,4 +10,5 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, In
     
     @Query("Select p from PaymentMethod p where p.paymentMethodId = :paymentMethodId")
     PaymentMethod findPaymentMethodById(@Param("paymentMethodId") Integer paymentMethodId);
+
 }

@@ -28,6 +28,7 @@ public class PaymentMethodController {
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
+    //admin's access
     @PostMapping
     public ResponseEntity<Void> addPaymentMethod(@RequestBody PaymentMethod paymentMethod) {
 
@@ -35,6 +36,7 @@ public class PaymentMethodController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    //admin's access
     @PutMapping
     public ResponseEntity<Void> updatePaymentMethod(@RequestBody PaymentMethod paymentMethod) {
 

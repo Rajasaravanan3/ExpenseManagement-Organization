@@ -11,14 +11,10 @@ import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
-import com.example.demo.ExpenseManagement.DTO.ApprovalsDTO;
-import com.example.demo.ExpenseManagement.DTO.BudgetDTO;
-import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
 import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Entity.Budget;
 import com.example.demo.ExpenseManagement.Entity.Expense;
-import com.example.demo.ExpenseManagement.Entity.Role;
 import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
@@ -40,13 +36,7 @@ public class ExpenseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private CategoryService categoryService;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private CurrencyService currencyService;
@@ -56,12 +46,6 @@ public class ExpenseService {
 
     @Autowired
     private BudgetRepository budgetRepository;
-
-    @Autowired
-    private BudgetService budgetService;
-
-    @Autowired
-    private RoleService roleService;
 
     @Autowired
     private ApprovalsService approvalsService;
@@ -184,7 +168,7 @@ public class ExpenseService {
     public String validateExpenseAmount(Long categoryId, BigDecimal currentBudget, BigDecimal updatedBudget) {
 
         String message = "";
-        List<Budget> budgets = budgetRepository.getBudgetsByCategory(categoryId);
+        List<Budget> budgets = budgetRepository.findBudgetsByCategory(categoryId);
 
         BigDecimal lastOneWeekExpenses = updatedBudget.add(this.getSumOfLastSevenDaysExpenses(categoryId)).subtract(currentBudget);
         BigDecimal lastOneMonthExpenses = updatedBudget.add(this.getSumOfLastOneMonthExpenses(categoryId)).subtract(currentBudget);
@@ -297,87 +281,6 @@ public class ExpenseService {
     }
 
 
-    // admin's access
-
-    //admin can update category, approver, budget
-    public void updateCategory(Long adminId, CategoryDTO categoryDTO) {
-
-        if(isAdmin(adminId)) {
-            categoryService.updateCategory(categoryDTO);
-        }
-    }
-
-    public void updateBudget(Long adminId, BudgetDTO budgetDTO) {
-
-        if(isAdmin(adminId)) {
-            budgetService.updateBudget(budgetDTO);
-        }
-    }
-
-    public void updateApprover(Long adminId, Long roleId, Boolean approverStatus) {
-
-        Role role = null;
-        if(isAdmin(adminId)) {
-            
-            role = roleService.getRoleById(roleId);
-            role.setIsApprover(approverStatus);
-        }
-    }
-
-    public List<UserDTO> getUsersByRoleName(Long adminId, Long organizationId, String roleName) {
-
-        List<UserDTO> users = new ArrayList<>();
-        if(isAdmin(adminId)) {
-            users = userService.getUsersByRoleName(organizationId, roleName);
-        }
-        return users;
-    }
-
-    public List<ApprovalsDTO> getApprovalsByApprovedUserId(Long adminId, Long userId) {
-        List<ApprovalsDTO> approvalsDTOs = null;
-        if(isAdmin(adminId)) {
-            approvalsDTOs = approvalsService.getApprovalsByApprovedUser(userId);
-        }
-        return approvalsDTOs;
-    }
-
-    public List<UserDTO> getAllUsers(Long adminId, Long organizationId) {
-
-        List<User> users = new ArrayList<>();
-        List<UserDTO> userDTOList = new ArrayList<>();
-        try {
-            if(isAdmin(adminId)) {
-                users = userRepository.findAllUsers(organizationId);
-                for (User user : users) {
-                    userDTOList.add(userService.mapUserToUserDTO(user));
-                }
-            }
-            return userDTOList;
-        }
-        catch (Exception e) {
-            throw new ApplicationException("An unexpected error occurred while retrieving all users working for the organization" + organizationId);
-        }
-    }
-
-    public boolean isAdmin(Long adminId) {
-        User admin = null;
-        try {
-            admin = userRepository.findUserById(adminId);
-            if(admin != null && admin.getRole().getRoleName().equalsIgnoreCase("admin")) {
-                return true;
-            }
-            else {
-                throw new ValidationException("Access denied", HttpStatus.FORBIDDEN);
-            }
-        }
-        catch (ValidationException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            throw new ApplicationException("An unexpected error occured while verifying admin");
-        }
-    }
-
 
 
     //approver's access
@@ -385,7 +288,7 @@ public class ExpenseService {
 
         List<Expense> expenseList = null;
         try {
-            if(isApprover(approverId)) {
+            if(this.isApprover(approverId)) {
                 expenseList = expenseRepository.findByDate(organizationId);
             }
             
@@ -402,7 +305,7 @@ public class ExpenseService {
         List<Expense> expenseList = new ArrayList<>();
         List<ExpenseDTO> expenseDTOList = new ArrayList<>();
         try {
-            if(isApprover(approverId)) {
+            if(this.isApprover(approverId)) {
                 expenseList = expenseRepository.findExpensesByStatus(organizationId, approvalStatus);
                 expenseDTOList = this.getExpenses(expenseList, "No expenses found with the approval status " + approvalStatus);
             }
@@ -417,7 +320,7 @@ public class ExpenseService {
         
         Expense existingExpense = null;
         try {
-            if(isApprover(approverId) && this.getExpenseById(expenseId) != null) {
+            if(this.isApprover(approverId) && this.getExpenseById(expenseId) != null) {
 
                 existingExpense = expenseRepository.findExpenseById(expenseId);
 

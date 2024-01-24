@@ -33,6 +33,9 @@ public class UserService {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private AdminVerification adminVerification;
+
     public UserDTO getUserById(Long userId) {
         
         User user = null;
@@ -51,11 +54,14 @@ public class UserService {
         }
     }
 
-    public List<UserDTO> getUsersByRoleName(Long organizationId, String roleName) {
+    public List<UserDTO> getUsersByRoleName(Long adminId, Long organizationId, String roleName) {
         List<User> users = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
         try {
-            users = userRepository.getusersByRoleName(organizationId, roleName);
+            if(adminVerification.isAdmin(adminId)) {
+                users = userRepository.getusersByRoleName(organizationId, roleName);
+            }
+            
             if(users == null) {
                 throw new ValidationException("No user found in the role " + roleName +" working for the organization id " + organizationId, null);
             }
@@ -164,6 +170,24 @@ public class UserService {
         }
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while updating.");
+        }
+    }
+
+    public List<UserDTO> getAllUsers(Long adminId, Long organizationId) {
+
+        List<User> users = new ArrayList<>();
+        List<UserDTO> userDTOList = new ArrayList<>();
+        try {
+            if(adminVerification.isAdmin(adminId)) {
+                users = userRepository.findAllUsers(organizationId);
+                for (User user : users) {
+                    userDTOList.add(this.mapUserToUserDTO(user));
+                }
+            }
+            return userDTOList;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving all users working for the organization" + organizationId);
         }
     }
 

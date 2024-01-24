@@ -1,5 +1,6 @@
 package com.example.demo.ExpenseManagement.Controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +29,26 @@ public class BudgetController {
         return new ResponseEntity<>(budgetDTO, HttpStatus.OK);
     }
 
-    // change to only admin can add budget
+    @GetMapping("/all")
+    public ResponseEntity<List<BudgetDTO>> getAllBudgets() {
+
+        List<BudgetDTO> budgetDTOs = budgetService.getAllBudgets();
+        return new ResponseEntity<>(budgetDTOs, HttpStatus.OK);
+    }
+
+    //admin's access
     @PostMapping
     public ResponseEntity<Void> addBudget(@RequestBody BudgetDTO budgetDTO) {
 
         budgetService.addBudget(budgetDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    //admin's access
+    @PutMapping("/{adminId}")
+    public ResponseEntity<Void> updateBudget(@PathVariable("adminId") Long adminId, @RequestBody BudgetDTO budgetDTO) {
+
+        budgetService.updateBudget(adminId, budgetDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

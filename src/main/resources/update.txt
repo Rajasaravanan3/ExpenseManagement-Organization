@@ -1,15 +1,17 @@
-add the endpoints to the respective controller classes, now it's in expenseController admin's access
-
-check for isActive in all getMapping endpoints
+remove all admin verifications
 
 only admin can add budget, category
-
-add getAllCategories (active categories alone)
-check if getCategoryById endpoint is needed if not, change return type of getCategoryById to Category in service to ease setter's
 
 add admin can delete(or set isActive column) currency, paymentmethod, role and only admin can update and add currency, paymentmethod, role
 add cascade to delete currency, paymentmethod, expense, role
 
-clarify whether admin can be set by organization only
-
 verify all endpoints
+
+enum type to string (comment it spring.jpa.hibernate.ddl-auto=validate at last and change enum type)
+
+
+add spring security
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>

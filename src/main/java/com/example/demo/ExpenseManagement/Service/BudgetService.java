@@ -2,6 +2,8 @@ package com.example.demo.ExpenseManagement.Service;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.ZoneId;
 
 import org.modelmapper.ModelMapper;
@@ -27,6 +29,9 @@ public class BudgetService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private AdminVerification adminVerification;
     
     public BudgetDTO getBudgetById(Long budgetId) {
         
@@ -43,6 +48,29 @@ public class BudgetService {
         }
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while retrieving budget by Id "+ budgetId);
+        }
+    }
+
+    public List<BudgetDTO> getAllBudgets() {
+        
+        List<BudgetDTO> budgetDTOs = new ArrayList<>();
+        List<Budget> budgets = new ArrayList<>();
+        try {
+            budgets = budgetRepository.findAllBudgets();
+            if(budgets == null) {
+                throw new ValidationException("No budgets found", HttpStatus.NOT_FOUND);
+            }
+
+            for (Budget budget : budgets) {
+                budgetDTOs.add(this.mapBudgetToBudgetDTO(budget));
+            }
+            return budgetDTOs;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving budgets.");
         }
     }
 
@@ -68,11 +96,14 @@ public class BudgetService {
         }
     }
 
-    public void updateBudget(BudgetDTO updatedBudgetDTO) {
+    public void updateBudget(Long adminId, BudgetDTO updatedBudgetDTO) {
 
         Budget existingBudget = null;
         try {
-            existingBudget = budgetRepository.findBudgetById(updatedBudgetDTO.getBudgetId());
+            if(adminVerification.isAdmin(adminId)) {
+                existingBudget = budgetRepository.findBudgetById(updatedBudgetDTO.getBudgetId());
+            }
+            
             if(existingBudget == null) {
                 throw new ValidationException("No record found to update for the budget id " + updatedBudgetDTO.getBudgetId(), HttpStatus.NOT_FOUND);
             }

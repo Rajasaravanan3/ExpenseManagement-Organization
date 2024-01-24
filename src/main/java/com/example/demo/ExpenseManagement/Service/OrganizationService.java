@@ -28,6 +28,7 @@ public class OrganizationService {
         Organization organization = null;
         try {
             organization = organizationRepository.findOrganizationById(organizationId);
+            
             if(organization == null) {
                 throw new ValidationException("No record found for the organization Id " + organizationId, HttpStatus.NOT_FOUND);
             }

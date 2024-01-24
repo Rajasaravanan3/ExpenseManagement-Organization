@@ -1,6 +1,8 @@
 package com.example.demo.ExpenseManagement.Service;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.time.ZoneId;
 
 import org.modelmapper.ModelMapper;
@@ -9,14 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
-import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Entity.Category;
-import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.CategoryRepository;
 import com.example.demo.ExpenseManagement.Repository.OrganizationRepository;
-import com.example.demo.ExpenseManagement.Repository.UserRepository;
 
 @Service
 public class CategoryService {
@@ -31,7 +30,7 @@ public class CategoryService {
     private OrganizationRepository organizationRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private AdminVerification adminVerification;
 
     public CategoryDTO getCategoryById(Long categoryId) {
         
@@ -48,6 +47,28 @@ public class CategoryService {
         }
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while retrieving category by Id "+ categoryId);
+        }
+    }
+
+    public List<CategoryDTO> getAllCategories() {
+        
+        List<CategoryDTO> categoryDTOs = new ArrayList<>();
+        List<Category> categories = new ArrayList<>();
+        try {
+            categories = categoryRepository.findAllCategories();
+            if(categories == null) {
+                throw new ValidationException("No category found", HttpStatus.NOT_FOUND);
+            }
+            for (Category category : categories) {
+                categoryDTOs.add(this.mapCategoryToCategoryDTO(category));
+            }
+            return categoryDTOs;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving categories.");
         }
     }
 
@@ -74,11 +95,14 @@ public class CategoryService {
         }
     }
 
-    public void updateCategory(CategoryDTO updatedCategoryDTO) {
+    public void updateCategory(Long adminId, CategoryDTO updatedCategoryDTO) {
 
         Category existingCategory = null;
         try {
-            existingCategory = categoryRepository.findCategoryById(updatedCategoryDTO.getCategoryId());
+            if(adminVerification.isAdmin(adminId)) {
+                existingCategory = categoryRepository.findCategoryById(updatedCategoryDTO.getCategoryId());
+            }
+            
             if(existingCategory == null) {
                 throw new ValidationException("No record found to update for the catgeory id" + updatedCategoryDTO.getCategoryId(), HttpStatus.NOT_FOUND);
             }

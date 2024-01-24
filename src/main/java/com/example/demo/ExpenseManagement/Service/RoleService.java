@@ -14,6 +14,9 @@ public class RoleService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private AdminVerification adminVerification;
     
     public Role getRoleById(Long roleId) {
         
@@ -51,12 +54,14 @@ public class RoleService {
         }
     }
 
-    public void updateRole(Role updatedRole) {
+    public void updateRole(Long adminId, Role updatedRole) {
         
         Role existingRole = null;
         try {
-            existingRole = roleRepository.findRoleById(updatedRole.getRoleId());
-
+            if(adminVerification.isAdmin(adminId)) {
+                existingRole = roleRepository.findRoleById(updatedRole.getRoleId());
+            }
+            
             if(existingRole == null) {
                 throw new ValidationException("No record found ro update for the role id " + updatedRole.getRoleId(), HttpStatus.NOT_FOUND);
             }

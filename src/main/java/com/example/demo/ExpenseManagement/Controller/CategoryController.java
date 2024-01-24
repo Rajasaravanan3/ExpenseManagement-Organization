@@ -1,5 +1,7 @@
 package com.example.demo.ExpenseManagement.Controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.ExpenseManagement.DTO.CategoryDTO;
 import com.example.demo.ExpenseManagement.Service.CategoryService;
+
 
 @RestController
 @RequestMapping("/categories")
@@ -28,10 +31,27 @@ public class CategoryController {
         return new ResponseEntity<>(categoryDTO, HttpStatus.OK);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+
+        List<CategoryDTO> categories = categoryService.getAllCategories();
+        return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+    
+
+    //admin's access
     @PostMapping
     public ResponseEntity<Void> addCategory(@RequestBody CategoryDTO categoryDTO) {
 
         categoryService.addCategory(categoryDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    //admin's access
+    @PutMapping("/{adminId}")
+    public ResponseEntity<Void> updateCategory(@PathVariable("adminId") Long adminId, @RequestBody CategoryDTO categoryDTO) {
+
+        categoryService.updateCategory(adminId, categoryDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

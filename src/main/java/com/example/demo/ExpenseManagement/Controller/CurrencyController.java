@@ -26,6 +26,7 @@ public class CurrencyController {
         return new ResponseEntity<>(currencyService.getCurrencyById(currencyId), HttpStatus.OK);
     }
 
+    //admin's access
     @PostMapping
     public ResponseEntity<Void> addCurrency(@RequestBody Currency currency) {
 
@@ -33,6 +34,7 @@ public class CurrencyController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    //admin's access
     @PutMapping
     public ResponseEntity<Void> updateCurrency(@RequestBody Currency currency) {
 
