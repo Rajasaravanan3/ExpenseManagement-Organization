@@ -29,9 +29,6 @@ public class CategoryService {
     @Autowired
     private OrganizationRepository organizationRepository;
 
-    @Autowired
-    private AdminVerification adminVerification;
-
     public CategoryDTO getCategoryById(Long categoryId) {
         
         Category category = null;
@@ -39,6 +36,9 @@ public class CategoryService {
             category = categoryRepository.findCategoryById(categoryId);
             if(category == null) {
                 throw new ValidationException("No record found for the category id " + categoryId, HttpStatus.NOT_FOUND);
+            }
+            if(category.getIsActive() == false) {
+                throw new ValidationException("The category id " + categoryId + " is inactive", HttpStatus.FORBIDDEN);
             }
             return this.mapCategoryToCategoryDTO(category);
         }
@@ -84,6 +84,8 @@ public class CategoryService {
                     throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             
             category = this.mapCategoryDTOToCategory(categoryDTO);
+
+            category.setIsActive(category.getIsActive() instanceof Boolean ? category.getIsActive() : true);
             
             categoryRepository.saveAndFlush(category);
         }
@@ -95,13 +97,11 @@ public class CategoryService {
         }
     }
 
-    public void updateCategory(Long adminId, CategoryDTO updatedCategoryDTO) {
+    public void updateCategory(CategoryDTO updatedCategoryDTO) {
 
         Category existingCategory = null;
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                existingCategory = categoryRepository.findCategoryById(updatedCategoryDTO.getCategoryId());
-            }
+            existingCategory = categoryRepository.findCategoryById(updatedCategoryDTO.getCategoryId());
             
             if(existingCategory == null) {
                 throw new ValidationException("No record found to update for the catgeory id" + updatedCategoryDTO.getCategoryId(), HttpStatus.NOT_FOUND);

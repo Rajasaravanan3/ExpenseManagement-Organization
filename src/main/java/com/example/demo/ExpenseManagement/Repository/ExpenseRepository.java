@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.math.BigDecimal;
 
+import com.example.demo.ExpenseManagement.Entity.ApprovalStatus;
 import com.example.demo.ExpenseManagement.Entity.Expense;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
@@ -64,6 +65,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     //filter list by approval status
     @Query("Select e from Expense e inner join e.user u inner join u.organization o where o.organizationId = :organizationId and e.approvalStatus = :approvalStatus")
-    List<Expense> findExpensesByStatus(@Param("organizationId") Long organizationId, @Param("approvalStatus") String approvalStatus);
+    List<Expense> findExpensesByStatus(@Param("organizationId") Long organizationId, @Param("approvalStatus") ApprovalStatus approvalStatus);
     
 }

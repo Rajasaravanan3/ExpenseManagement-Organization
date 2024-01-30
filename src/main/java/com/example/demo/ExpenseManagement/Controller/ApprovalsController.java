@@ -23,10 +23,10 @@ public class ApprovalsController {
 
     //get all approvals done by an user(approver)
     //admin's access
-    @GetMapping("/{adminId}")
-    public ResponseEntity<List<ApprovalsDTO>> getAllApprovalsByUser(@PathVariable("adminId") Long adminId, @RequestParam("userId") Long userId) {
+    @GetMapping
+    public ResponseEntity<List<ApprovalsDTO>> getAllApprovalsByUser(@RequestParam("userId") Long userId) {
         
-        List<ApprovalsDTO> approvalsDTOList = approvalsService.getApprovalsByApprovedUserId(adminId, userId);
+        List<ApprovalsDTO> approvalsDTOList = approvalsService.getApprovalsByApprovedUserId(userId);
         if(approvalsDTOList != null) {
             return new ResponseEntity<>(approvalsDTOList, HttpStatus.OK);
         }
@@ -34,10 +34,10 @@ public class ApprovalsController {
     }
 
     //admin's access
-    @GetMapping("/{adminId}/")
-    public ResponseEntity<ApprovalsDTO> getApprovalByApprovalId(@PathVariable("adminId") Long adminId, @RequestParam("approvalId") Long approvalId) {
+    @GetMapping("/")
+    public ResponseEntity<ApprovalsDTO> getApprovalByApprovalId(@RequestParam("approvalId") Long approvalId) {
         
-        ApprovalsDTO approval = approvalsService.getApprovalById(adminId, approvalId);
+        ApprovalsDTO approval = approvalsService.getApprovalById(approvalId);
         if(approval != null) {
             return new ResponseEntity<>(approval, HttpStatus.OK);
         }

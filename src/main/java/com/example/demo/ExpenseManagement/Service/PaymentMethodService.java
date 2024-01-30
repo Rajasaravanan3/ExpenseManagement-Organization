@@ -24,6 +24,9 @@ public class PaymentMethodService {
             if(paymentMethod == null) {
                 throw new ValidationException("No record found for the paymentMethod id " + paymentMethodId, HttpStatus.NOT_FOUND);
             }
+            else if(paymentMethod.getIsActive() == false) {
+                throw new ValidationException("The paymentMethod id " + paymentMethodId + " is inactive", HttpStatus.FORBIDDEN);
+            }
         }
         catch (ValidationException e) {
             throw e;
@@ -42,6 +45,8 @@ public class PaymentMethodService {
                 (paymentMethod.getPaymentMethodDescription() instanceof String && paymentMethod.getPaymentMethodDescription().length() > 300))
 
                 throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
+
+            paymentMethod.setIsActive(paymentMethod.getIsActive() instanceof Boolean ? (paymentMethod.getIsActive()) : (true));
 
             paymentMethodRepository.saveAndFlush(paymentMethod);
         }
@@ -73,6 +78,10 @@ public class PaymentMethodService {
                     throw new ValidationException("Payment method description must not exceed 300 characters", HttpStatus.BAD_REQUEST);
                 }
                 existingPaymentMethod.setPaymentMethodDescription(updatedPaymentMethod.getPaymentMethodDescription());
+            }
+
+            if(updatedPaymentMethod.getIsActive() instanceof Boolean) {
+                existingPaymentMethod.setIsActive(updatedPaymentMethod.getIsActive());
             }
             paymentMethodRepository.saveAndFlush(existingPaymentMethod);
         }

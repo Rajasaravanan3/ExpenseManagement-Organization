@@ -52,10 +52,10 @@ public class UserController {
 
     //get users working for the organization
     //admin's access
-    @GetMapping("/{adminId}/all")
-    public ResponseEntity<List<UserDTO>> getAllUsers(@PathVariable("adminId") Long adminId, @RequestParam("organizationId") Long organizationId) {
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam("organizationId") Long organizationId) {
         
-        List<UserDTO> userDTOList = userService.getAllUsers(organizationId, adminId);
+        List<UserDTO> userDTOList = userService.getAllUsers(organizationId);
         if(userDTOList != null) {
             return new ResponseEntity<>(userDTOList, HttpStatus.OK);
         }
@@ -64,10 +64,10 @@ public class UserController {
 
     //get users by role name
     //admin's access
-    @GetMapping("/{adminId}/role")
-    public ResponseEntity<List<UserDTO>> getUsersByRoleName(@PathVariable("adminId") Long adminId, @RequestParam("organizationId") Long organizationId, @RequestParam("roleName") String roleName) {
+    @GetMapping("/role")
+    public ResponseEntity<List<UserDTO>> getUsersByRoleName(@RequestParam("organizationId") Long organizationId, @RequestParam("roleName") String roleName) {
         
-        List<UserDTO> userDTOList = userService.getUsersByRoleName(organizationId, adminId, roleName);
+        List<UserDTO> userDTOList = userService.getUsersByRoleName(organizationId, roleName);
         if(userDTOList != null) {
             return new ResponseEntity<>(userDTOList, HttpStatus.OK);
         }

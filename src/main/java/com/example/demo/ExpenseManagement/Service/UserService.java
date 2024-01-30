@@ -2,6 +2,8 @@ package com.example.demo.ExpenseManagement.Service;
 
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.ArrayList;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,11 @@ public class UserService {
 
     @Autowired
     private OrganizationService organizationService;
-
-    @Autowired
-    private AdminVerification adminVerification;
+    
+    Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    Pattern hashedPasswordPattern = Pattern.compile("^[a-zA-Z0-9+/]{8,}$");
+    Pattern usernamePattern = Pattern.compile("^[A-Za-z]+[ ]+[A-Za-z]+$");
+    Matcher matcher = null;
 
     public UserDTO getUserById(Long userId) {
         
@@ -54,13 +58,11 @@ public class UserService {
         }
     }
 
-    public List<UserDTO> getUsersByRoleName(Long adminId, Long organizationId, String roleName) {
+    public List<UserDTO> getUsersByRoleName(Long organizationId, String roleName) {
         List<User> users = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                users = userRepository.getusersByRoleName(organizationId, roleName);
-            }
+            users = userRepository.getusersByRoleName(organizationId, roleName);
             
             if(users == null) {
                 throw new ValidationException("No user found in the role " + roleName +" working for the organization id " + organizationId, null);
@@ -105,6 +107,20 @@ public class UserService {
 
                 throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             }
+            matcher = usernamePattern.matcher(userDTO.getUserName());
+            boolean validName = matcher.find();
+            boolean validEmail = emailPattern.matcher(userDTO.getUserEmail()).find();
+            boolean validPassword = hashedPasswordPattern.matcher(userDTO.getUserPassword()).find();
+            if(!validName) {
+                throw new ValidationException("Invalid username", HttpStatus.BAD_REQUEST);
+            }
+            else if(!validEmail) {
+                throw new ValidationException("Invalid email address", HttpStatus.BAD_REQUEST);
+            }
+            else if(!validPassword) {
+                throw new ValidationException("Invalid password", HttpStatus.BAD_REQUEST);
+            }
+
             user = this.mapUserDTOToUser(userDTO);
             user.setOrganization(organizationRepository.findOrganizationById(userDTO.getOrganizationId()));
             user.setRole(roleService.getRoleById(userDTO.getRoleId()));
@@ -132,6 +148,9 @@ public class UserService {
 
                 if(updatedUserDTO.getUserName().length() > 50)
                     throw new ValidationException("User name must not exceed 50 characters", HttpStatus.BAD_REQUEST);
+                if(!usernamePattern.matcher(updatedUserDTO.getUserName()).find()) {
+                    throw new ValidationException("Invalid username", HttpStatus.BAD_REQUEST);
+                }
                 existingUser.setUserName(updatedUserDTO.getUserName());
             }
 
@@ -139,6 +158,9 @@ public class UserService {
 
                 if(updatedUserDTO.getUserEmail().length() > 350)
                     throw new ValidationException("User email must not exceed 350 characters", HttpStatus.BAD_REQUEST);
+                if(!emailPattern.matcher(updatedUserDTO.getUserEmail()).find()) {
+                    throw new ValidationException("Invalid Email address", HttpStatus.BAD_REQUEST);
+                }
                 existingUser.setUserEmail(updatedUserDTO.getUserEmail());
             }
 
@@ -146,6 +168,9 @@ public class UserService {
 
                 if(updatedUserDTO.getUserPassword().length() > 130)
                     throw new ValidationException("User password must not exceed 130 characters", HttpStatus.BAD_REQUEST);
+                if(!hashedPasswordPattern.matcher(updatedUserDTO.getUserPassword()).find()) {
+                    throw new ValidationException("Invalid password", HttpStatus.BAD_REQUEST);
+                }
                 existingUser.setUserPassword(updatedUserDTO.getUserPassword());
             }
 
@@ -173,17 +198,16 @@ public class UserService {
         }
     }
 
-    public List<UserDTO> getAllUsers(Long adminId, Long organizationId) {
+    public List<UserDTO> getAllUsers(Long organizationId) {
 
         List<User> users = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                users = userRepository.findAllUsers(organizationId);
-                for (User user : users) {
-                    userDTOList.add(this.mapUserToUserDTO(user));
-                }
+            users = userRepository.findAllUsers(organizationId);
+            for (User user : users) {
+                userDTOList.add(this.mapUserToUserDTO(user));
             }
+
             return userDTOList;
         }
         catch (Exception e) {

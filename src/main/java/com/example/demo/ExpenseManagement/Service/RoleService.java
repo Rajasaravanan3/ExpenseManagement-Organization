@@ -14,9 +14,6 @@ public class RoleService {
 
     @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
-    private AdminVerification adminVerification;
     
     public Role getRoleById(Long roleId) {
         
@@ -25,6 +22,9 @@ public class RoleService {
             role = roleRepository.findRoleById(roleId);
             if(role == null)
                 throw new ValidationException("No record found for the roleId " + roleId, HttpStatus.NOT_FOUND);
+            if(!role.getIsActive()) {
+                throw new ValidationException("This role is not active right now", HttpStatus.FORBIDDEN);
+            }
         }
         catch (ValidationException e) {
             throw e;
@@ -54,16 +54,14 @@ public class RoleService {
         }
     }
 
-    public void updateRole(Long adminId, Role updatedRole) {
+    public void updateRole(Role updatedRole) {
         
         Role existingRole = null;
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                existingRole = roleRepository.findRoleById(updatedRole.getRoleId());
-            }
+            existingRole = roleRepository.findRoleById(updatedRole.getRoleId());
             
             if(existingRole == null) {
-                throw new ValidationException("No record found ro update for the role id " + updatedRole.getRoleId(), HttpStatus.NOT_FOUND);
+                throw new ValidationException("No record found to update for the role id " + updatedRole.getRoleId(), HttpStatus.NOT_FOUND);
             }
 
             if(updatedRole.getRoleName() instanceof String && ! (updatedRole.getRoleName().isEmpty())) {
@@ -83,6 +81,11 @@ public class RoleService {
             if(updatedRole.getIsApprover() instanceof Boolean){
 
                 existingRole.setIsApprover(updatedRole.getIsApprover());
+            }
+
+            if(updatedRole.getIsActive() instanceof Boolean){
+
+                existingRole.setIsActive(updatedRole.getIsActive());
             }
             roleRepository.saveAndFlush(existingRole);
         }

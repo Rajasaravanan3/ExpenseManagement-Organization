@@ -1,7 +1,6 @@
-
+drop database Expense_management;
 create database Expense_management;
 use Expense_management;
--- drop database Expense_management;
 
 
 create table Address(
@@ -26,6 +25,7 @@ create table Role(
 	role_id bigint unsigned auto_increment primary key,
     role_name varchar(40) unique not null,
     role_description varchar(300),
+    is_active boolean default true,
     is_approver boolean default false
 );
 
@@ -44,18 +44,20 @@ create table user(
 create table currency(
 	currency_id int unsigned auto_increment primary key,
     currency_code varchar(3) unique not null,
-    currency_name varchar(30)
+    currency_name varchar(30),
+    is_active boolean default true
 );
 
 create table payment_method(
 	payment_method_id int unsigned auto_increment primary key,
     payment_method_name varchar(20) unique not null,
-    payment_method_description varchar(300)
+    payment_method_description varchar(300),
+    is_active boolean default true
 );
 
 create table category(
 	category_id bigint unsigned auto_increment primary key,
-    category_name varchar(40) not null,
+    category_name varchar(40) unique not null,
     category_description varchar(300),
     created_date timestamp default current_timestamp,
     modified_date timestamp default current_timestamp on update current_timestamp,
@@ -80,7 +82,7 @@ create table expense(
     amount Decimal(10,2) not null,
     expense_date timestamp not null default current_timestamp,
     expense_description varchar(1000) not null,
-    approval_status varchar(15) not null,
+    approval_status varchar(20) default "NOT_APPROVED",
     category_id bigint unsigned not null,
     currency_id int unsigned not null,
     payment_method_id int unsigned not null,
@@ -97,7 +99,7 @@ create table Approvals(
     approved_date timestamp not null default current_timestamp,
     expense_id bigint unsigned not null,
     unique key unique_approval(approved_by, expense_id),
-    foreign key (expense_id) references expense(expense_id),
+    foreign key (expense_id) references expense(expense_id) on delete cascade,
     foreign key (approved_by) references user(user_id)
 );
 
@@ -130,7 +132,6 @@ VALUES
 (9, 'CompanyI', 'Org606', 9, true),
 (10, 'CompanyJ', 'Org707', 10, true);
 
-
 INSERT INTO role (role_id, role_name, role_description, is_approver)
 VALUES
 (1, 'Admin', 'System Administrator', true),
@@ -157,7 +158,6 @@ VALUES
 (8, 'Grace Moore', 8, 'grace@example.com', 'hashedpassword8', true, 8),
 (9, 'Henry Lee', 9, 'henry@example.com', 'hashedpassword9', true, 9),
 (10, 'Ivy Clark', 10, 'ivy@example.com', 'hashedpassword10', true, 10);
-
 
 INSERT INTO currency (currency_id, currency_code, currency_name)
 VALUES
@@ -205,16 +205,16 @@ INSERT INTO budget (budget_id, budget_amount, budget_type, created_date, modifie
 VALUES
 (1, 1000.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 1),
 (2, 2000.00, 'MONTHLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 2),
-(3, 5000.00, 'YEARLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 3),
+(3, 5000.00, 'ANNUAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 3),
 (4, 1500.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 4),
 (5, 3000.00, 'MONTHLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 5),
-(6, 8000.00, 'YEARLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 6),
+(6, 8000.00, 'ANNUAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 6),
 (7, 2500.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 7),
 (8, 6000.00, 'MONTHLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 8),
-(9, 10000.00, 'YEARLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 9),
+(9, 10000.00, 'ANNUAL', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 9),
 (10, 4000.00, 'WEEKLY', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, 10);
 
-
+-- select * from expense;
 INSERT INTO expense (expense_id, amount, expense_date, expense_description, category_id, currency_id, payment_method_id, expense_made_by, approval_status)
 VALUES
 (1, 150.00, '2024-01-10', 'Office Supplies Purchase', 1, 1, 1, 1, 'APPROVED'),

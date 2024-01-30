@@ -23,6 +23,9 @@ public class CurrencyService {
             if(currency == null) {
                 throw new ValidationException("No record found for the currencyId " + currencyId, HttpStatus.NOT_FOUND);
             }
+            if(currency.getIsActive() == false) {
+                throw new ValidationException("The currency id " + currencyId + " is inactive", HttpStatus.FORBIDDEN);
+            }
         }
         catch (ValidationException e) {
             throw e;
@@ -42,6 +45,8 @@ public class CurrencyService {
 
                     throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
 
+            currency.setIsActive(currency.getIsActive() instanceof Boolean ? currency.getIsActive() : true);
+            
             currencyRepository.saveAndFlush(currency);
         }
         catch (ValidationException e) {
@@ -73,6 +78,7 @@ public class CurrencyService {
                 }
                 existingCurrency.setCurrencyName(updatedCurrency.getCurrencyName());
             }
+            
             currencyRepository.saveAndFlush(existingCurrency);
         }
         catch (ValidationException e) {

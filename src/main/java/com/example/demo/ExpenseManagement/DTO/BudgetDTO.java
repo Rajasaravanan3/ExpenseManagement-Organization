@@ -3,13 +3,15 @@ package com.example.demo.ExpenseManagement.DTO;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+import com.example.demo.ExpenseManagement.Entity.BudgetType;
+
 public class BudgetDTO {
     
     private Long budgetId;
 
     private BigDecimal budgetAmount;
 
-    private String budgetType;
+    private BudgetType budgetType;
 
     private ZonedDateTime createdTime;
 
@@ -22,7 +24,7 @@ public class BudgetDTO {
     public BudgetDTO() {
     }
 
-    public BudgetDTO(Long budgetId, BigDecimal budgetAmount, String budgetType, ZonedDateTime createdTime,
+    public BudgetDTO(Long budgetId, BigDecimal budgetAmount, BudgetType budgetType, ZonedDateTime createdTime,
             ZonedDateTime modifiedTime, Boolean isActive, Long categoryId) {
         this.budgetId = budgetId;
         this.budgetAmount = budgetAmount;
@@ -49,11 +51,11 @@ public class BudgetDTO {
         this.budgetAmount = budgetAmount;
     }
 
-    public String getBudgetType() {
+    public BudgetType getBudgetType() {
         return budgetType;
     }
 
-    public void setBudgetType(String budgetType) {
+    public void setBudgetType(BudgetType budgetType) {
         this.budgetType = budgetType;
     }
 

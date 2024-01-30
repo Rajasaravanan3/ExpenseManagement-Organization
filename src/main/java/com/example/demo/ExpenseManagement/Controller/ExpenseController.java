@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
-import com.example.demo.ExpenseManagement.Service.ApprovalsService;
+import com.example.demo.ExpenseManagement.Entity.ApprovalStatus;
 import com.example.demo.ExpenseManagement.Service.ExpenseService;
 
 @RestController
@@ -75,7 +75,7 @@ public class ExpenseController {
     }
 
     //get expenses by currency code
-    @GetMapping("/filters/currency-Code")
+    @GetMapping("/filters/currency-code")
     public ResponseEntity<List<ExpenseDTO>> getExpensesByCurrencyCode(@RequestParam("organizationId") Long organizationId, @RequestParam("currencyCode") String currencyCode) {
         
         List<ExpenseDTO> expenseDTOList = expenseService.getByCurrencyCode(organizationId, currencyCode);
@@ -137,7 +137,7 @@ public class ExpenseController {
 
     //get expenses by approval status
     @GetMapping("/approver/{approverId}/approval-status")
-    public ResponseEntity<List<ExpenseDTO>> getExpensesByStatus(@PathVariable("approverId") Long approverId, @RequestParam("organizationId") Long organizationId, @RequestParam("approvalStatus") String approvalStatus) {
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByStatus(@PathVariable("approverId") Long approverId, @RequestParam("organizationId") Long organizationId, @RequestParam("approvalStatus") ApprovalStatus approvalStatus) {
 
         List<ExpenseDTO> expenseDtoList = expenseService.getExpensesByStatus(approverId, organizationId, approvalStatus);
         if(expenseDtoList != null) {
@@ -148,9 +148,9 @@ public class ExpenseController {
 
     //update approval status -> after approving or rejecting the expense
     @PutMapping("/approver/{approverId}/approval-status")
-    public ResponseEntity<Void> updateApprovalStatus(@PathVariable("approverId") Long approverId, @RequestParam("expenseId") Long expenseId, @RequestParam("approvalStatus") String approvalStatus) {
+    public ResponseEntity<Void> updateApprovalStatus(@PathVariable("approverId") Long approverId, @RequestParam("expenseId") Long expenseId, @RequestParam("statusMessage") Boolean status) {
 
-        expenseService.updateApprovalStatus(approverId, expenseId, approvalStatus);
+        expenseService.updateApprovalStatus(approverId, expenseId, status);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

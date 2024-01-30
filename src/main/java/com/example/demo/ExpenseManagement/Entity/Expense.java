@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,8 +31,9 @@ public class Expense {
     @Column(name = "expense_description")
     private String expenseDescription;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "approval_status")
-    private String approvalStatus;
+    private ApprovalStatus approvalStatus;
 
     @OneToOne
     @JoinColumn(name = "category_id", referencedColumnName = "category_id")
@@ -51,7 +54,7 @@ public class Expense {
     public Expense() {}
 
     public Expense(Long expenseId, BigDecimal amount, ZonedDateTime expenseDate, String expenseDescription,
-            String approvalStatus, Category category, Currency currency, PaymentMethod paymentMethod, User user) {
+        ApprovalStatus approvalStatus, Category category, Currency currency, PaymentMethod paymentMethod, User user) {
         this.expenseId = expenseId;
         this.amount = amount;
         this.expenseDate = expenseDate;
@@ -97,11 +100,11 @@ public class Expense {
         this.expenseDescription = expenseDescription;
     }
 
-    public String getApprovalStatus() {
+    public ApprovalStatus getApprovalStatus() {
         return approvalStatus;
     }
 
-    public void setApprovalStatus(String approvalStatus) {
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
         this.approvalStatus = approvalStatus;
     }
 

@@ -20,6 +20,9 @@ public class Currency {
     @Column(name = "currency_name")
     private String currencyName;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     public Currency() {}
 
     public Currency(Integer currencyId, String currencyCode, String currencyName) {
@@ -50,6 +53,14 @@ public class Currency {
 
     public void setCurrencyName(String currencyName) {
         this.currencyName = currencyName;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
 }

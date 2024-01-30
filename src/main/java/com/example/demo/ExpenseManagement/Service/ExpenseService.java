@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.ArrayList;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import com.example.demo.ExpenseManagement.DTO.ApprovalsDTO;
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
-import com.example.demo.ExpenseManagement.DTO.UserDTO;
+import com.example.demo.ExpenseManagement.Entity.ApprovalStatus;
 import com.example.demo.ExpenseManagement.Entity.Budget;
 import com.example.demo.ExpenseManagement.Entity.Expense;
 import com.example.demo.ExpenseManagement.Entity.User;
@@ -36,7 +38,13 @@ public class ExpenseService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private CurrencyService currencyService;
@@ -74,20 +82,25 @@ public class ExpenseService {
         Expense expense = null;
         String notification = "";
         try {
-            if(expenseDTO == null || expenseDTO.getCurrencyId() instanceof Integer || expenseDTO.getUserId() instanceof Long ||
-                expenseDTO.getPaymentMethodId() instanceof Integer || expenseDTO.getCategoryId() instanceof Long ||
-                (expenseDTO.getAmount() instanceof BigDecimal && validateBigDecimal(expenseDTO.getAmount(), 10, 2)) ||
-                expenseDTO.getExpenseDate() instanceof ZonedDateTime ||
-                (expenseDTO.getExpenseDescription() instanceof String && (expenseDTO.getExpenseDescription().isEmpty() || expenseDTO.getExpenseDescription().length() > 1000)))
+            if(expenseDTO == null || !(expenseDTO.getCurrencyId() instanceof Integer) || !(expenseDTO.getUserId() instanceof Long) ||
+                !(expenseDTO.getPaymentMethodId() instanceof Integer) || !(expenseDTO.getCategoryId() instanceof Long) ||
+                (!(expenseDTO.getAmount() instanceof BigDecimal) && validateBigDecimal(expenseDTO.getAmount(), 10, 2)) ||
+                (!(expenseDTO.getExpenseDescription() instanceof String) && (expenseDTO.getExpenseDescription().isEmpty() || expenseDTO.getExpenseDescription().length() > 1000))) {
 
-                throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
-
+                    throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
+            }
+            if(paymentMethodService.getPaymentMethodById(expenseDTO.getPaymentMethodId()) != null &&
+                currencyService.getCurrencyById(expenseDTO.getCurrencyId()) != null &&
+                categoryService.getCategoryById(expenseDTO.getCategoryId()) != null &&
+                userService.getUserById(expenseDTO.getUserId()) != null) {
+                    // exception will be thrown in their respective services if wrong reference is given
+            }
             expense = this.mapExpenseDTOToExpense(expenseDTO);
             
             notification = this.validateExpenseAmount(expenseDTO.getCategoryId(), BigDecimal.ZERO, expenseDTO.getAmount());
                 
-                if(!notification.isEmpty())
-                    return notification;
+            if(!notification.isEmpty())
+                return notification;
 
             expenseRepository.saveAndFlush(expense);
             return "Expense added successfully";
@@ -104,10 +117,16 @@ public class ExpenseService {
 
         Expense existingExpense = null;
         try {
+            if(this.getExpenseById(expenseId).getApprovalStatus() != ApprovalStatus.NOT_APPROVED) {
+                throw new ValidationException("Your expense has already been either approved or rejected", HttpStatus.FORBIDDEN);
+            }
             existingExpense = expenseRepository.findExpenseById(expenseId);
             if(this.getExpenseById(expenseId) != null && existingExpense.getUser().getUserId().equals(userId)) {
                 expenseRepository.deleteById(expenseId);
             }
+        }
+        catch (ValidationException e) {
+            throw e;
         }
         catch(Exception e) {
             throw new ApplicationException("An unexpected error occured while deleting the expense id " + expenseId);
@@ -151,6 +170,8 @@ public class ExpenseService {
         expense.setCurrency(currencyService.getCurrencyById(expenseDTO.getCurrencyId()));
         expense.setPaymentMethod(paymentMethodService.getPaymentMethodById(expenseDTO.getPaymentMethodId()));
         expense.setUser(userRepository.findUserById(expenseDTO.getUserId()));
+        expense.setExpenseDate(ZonedDateTime.now(ZoneId.of("UTC")));
+        expense.setApprovalStatus(ApprovalStatus.NOT_APPROVED);
         return expense;
     }
 
@@ -295,12 +316,15 @@ public class ExpenseService {
             String notFoundMessage = "No expense found";
             return this.getExpenses(expenseList, notFoundMessage);
         }
+        catch(ValidationException e) {
+            throw e;
+        }
         catch (Exception e) {
             throw new ApplicationException("An unexpected error occurred while retrieving recent expenses");
         }
     }
 
-    public List<ExpenseDTO> getExpensesByStatus(Long approverId, Long organizationId, String approvalStatus) {
+    public List<ExpenseDTO> getExpensesByStatus(Long approverId, Long organizationId, ApprovalStatus approvalStatus) {
         
         List<Expense> expenseList = new ArrayList<>();
         List<ExpenseDTO> expenseDTOList = new ArrayList<>();
@@ -311,26 +335,42 @@ public class ExpenseService {
             }
             return expenseDTOList;
         }
+        catch(ValidationException e) {
+            throw e;
+        }
         catch (Exception e) {
-            throw new ApplicationException("An unexpected error occurred while updating expense.");
+            throw new ApplicationException("An unexpected error occurred while retrieving expense by approval status " + approvalStatus);
         }
     }
     
-    public void updateApprovalStatus(Long approverId, Long expenseId, String approvalStatus) {
+    public void updateApprovalStatus(Long approverId, Long expenseId, Boolean statusMessage) {
         
         Expense existingExpense = null;
+        List<ApprovalsDTO> approvalList = new ArrayList<>();
         try {
             if(this.isApprover(approverId) && this.getExpenseById(expenseId) != null) {
-
+                ApprovalStatus approvalStatus;
+                
                 existingExpense = expenseRepository.findExpenseById(expenseId);
+                approvalList = approvalsService.getByExpenseId(expenseId);
 
-                if(approvalStatus instanceof String && !(approvalStatus.isEmpty() || approvalStatus.length() > 15)) {
-                    existingExpense.setApprovalStatus(approvalStatus);
-                    approvalsService.addApproval(approverId, expenseId);
+                if(Boolean.TRUE.equals(statusMessage)) {
+                    if(approvalList.isEmpty()) {
+                        approvalStatus = ApprovalStatus.PARTIAL;
+                    }
+                    else if(approvalList.size() == 1) {
+                        approvalStatus = ApprovalStatus.APPROVED;
+                    }
+                    else {
+                        throw new ValidationException("Already approved", HttpStatus.BAD_REQUEST);
+                    }
                 }
                 else {
-                    throw new ValidationException("Invalid approval status", HttpStatus.BAD_REQUEST);
+                    approvalStatus = ApprovalStatus.REJECTED;
                 }
+                
+                existingExpense.setApprovalStatus(approvalStatus);
+                approvalsService.addApproval(approverId, expenseId);        //adds a new record in approvals table
             }
             expenseRepository.saveAndFlush(existingExpense);
         }

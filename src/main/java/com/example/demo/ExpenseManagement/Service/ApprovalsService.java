@@ -32,17 +32,12 @@ public class ApprovalsService {
 
     @Autowired
     private ExpenseRepository expenseRepository;
-
-    @Autowired
-    private AdminVerification adminVerification;
     
-    public ApprovalsDTO getApprovalById(Long adminId, Long approvalId) {
+    public ApprovalsDTO getApprovalById(Long approvalId) {
         
         Approvals approval = null;
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                approval = approvalsRepository.findByApprovalId(approvalId);
-            }
+            approval = approvalsRepository.findByApprovalId(approvalId);
             if(approval == null) {
                 throw new ValidationException("No approval found for the approval id " + approvalId, HttpStatus.NOT_FOUND);
             }
@@ -56,14 +51,12 @@ public class ApprovalsService {
         }
     }
 
-    public List<ApprovalsDTO> getApprovalsByApprovedUserId(Long adminId, Long userId) {
+    public List<ApprovalsDTO> getApprovalsByApprovedUserId(Long userId) {
         
         List<ApprovalsDTO> approvalsDTO = new ArrayList<>();
         List<Approvals> approvals = new ArrayList<>();
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                approvals = approvalsRepository.findByApprovedUser(userId);
-            }
+            approvals = approvalsRepository.findByApprovedUser(userId);
             
             if(approvals == null) {
                 throw new ValidationException("No approval found for the user id " + userId, HttpStatus.NOT_FOUND);
@@ -81,9 +74,31 @@ public class ApprovalsService {
         }
     }
 
+    public List<ApprovalsDTO> getByExpenseId(Long expenseId) {
+        List<ApprovalsDTO> approvalsDTO = new ArrayList<>();
+        List<Approvals> approvals = new ArrayList<>();
+        try {
+            approvals = approvalsRepository.findByExpenseId(expenseId);
+            
+            if(approvals == null) {
+                throw new ValidationException("No approval found for the expense id " + expenseId, HttpStatus.NOT_FOUND);
+            }
+            for (Approvals approval : approvals) {
+                approvalsDTO.add(this.mapApprovalsToApprovalsDTO(approval));
+            }
+            return approvalsDTO;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occurred while retrieving approvals by expenseId " + expenseId);
+        }
+    }
+
     public void addApproval(Long approverId, Long expenseId) {
         
-        Approvals approval = null;
+        Approvals approval = new Approvals();
         try {
             if(approverId instanceof Long && expenseId instanceof Long) {
 

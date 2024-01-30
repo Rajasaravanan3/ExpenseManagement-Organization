@@ -3,6 +3,8 @@ package com.example.demo.ExpenseManagement.DTO;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
+import com.example.demo.ExpenseManagement.Entity.ApprovalStatus;
+
 public class ExpenseDTO {
     
     private Long expenseId;
@@ -13,7 +15,7 @@ public class ExpenseDTO {
 
     private String expenseDescription;
 
-    private String approvalStatus;
+    private ApprovalStatus approvalStatus;
 
     private Long categoryId;
 
@@ -26,7 +28,7 @@ public class ExpenseDTO {
     public ExpenseDTO() {}
 
     public ExpenseDTO(Long expenseId, BigDecimal amount, ZonedDateTime expenseDate, String expenseDescription,
-            String approvalStatus, Long categoryId, Integer currencyId, Integer paymentMethodId, Long userId) {
+        ApprovalStatus approvalStatus, Long categoryId, Integer currencyId, Integer paymentMethodId, Long userId) {
         this.expenseId = expenseId;
         this.amount = amount;
         this.expenseDate = expenseDate;
@@ -70,11 +72,11 @@ public class ExpenseDTO {
         this.expenseDescription = expenseDescription;
     }
 
-    public String getApprovalStatus() {
+    public ApprovalStatus getApprovalStatus() {
         return approvalStatus;
     }
 
-    public void setApprovalStatus(String approvalStatus) {
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
         this.approvalStatus = approvalStatus;
     }
 

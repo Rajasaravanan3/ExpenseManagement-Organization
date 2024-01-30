@@ -35,10 +35,10 @@ public class RoleController {
     }
 
     //admin's access
-    @PutMapping("/{adminId}")
-    public ResponseEntity<Void> updateApprover(@PathVariable("adminId") Long adminId, @RequestBody Role role) {
+    @PutMapping
+    public ResponseEntity<Void> updateApprover(@RequestBody Role role) {
 
-        roleService.updateRole(adminId, role);
+        roleService.updateRole(role);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

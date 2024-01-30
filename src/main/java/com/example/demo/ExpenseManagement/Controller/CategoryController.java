@@ -1,6 +1,5 @@
 package com.example.demo.ExpenseManagement.Controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,10 +47,10 @@ public class CategoryController {
     }
 
     //admin's access
-    @PutMapping("/{adminId}")
-    public ResponseEntity<Void> updateCategory(@PathVariable("adminId") Long adminId, @RequestBody CategoryDTO categoryDTO) {
+    @PutMapping
+    public ResponseEntity<Void> updateCategory(@RequestBody CategoryDTO categoryDTO) {
 
-        categoryService.updateCategory(adminId, categoryDTO);
+        categoryService.updateCategory(categoryDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -20,6 +20,9 @@ public class Role {
     @Column(name = "role_description")
     private String roleDescription;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     @Column(name = "is_approver")
     private Boolean isApprover;
 
@@ -54,6 +57,14 @@ public class Role {
 
     public void setRoleDescription(String roleDescription) {
         this.roleDescription = roleDescription;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     public Boolean getIsApprover() {

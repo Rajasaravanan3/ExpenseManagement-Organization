@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.ExpenseManagement.DTO.BudgetDTO;
 import com.example.demo.ExpenseManagement.Entity.Budget;
+import com.example.demo.ExpenseManagement.Entity.BudgetType;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.BudgetRepository;
@@ -29,9 +30,6 @@ public class BudgetService {
 
     @Autowired
     private CategoryRepository categoryRepository;
-
-    @Autowired
-    private AdminVerification adminVerification;
     
     public BudgetDTO getBudgetById(Long budgetId) {
         
@@ -40,6 +38,9 @@ public class BudgetService {
             budget = budgetRepository.findBudgetById(budgetId);
             if(budget == null) {
                 throw new ValidationException("No record found for the budget id " + budgetId, HttpStatus.NOT_FOUND);
+            }
+            if(budget.getIsActive() == false) {
+                throw new ValidationException("The budget id " + budgetId + " is inactive", HttpStatus.FORBIDDEN);
             }
             return this.mapBudgetToBudgetDTO(budget);
         }
@@ -74,17 +75,19 @@ public class BudgetService {
         }
     }
 
-    public void addBudget(BudgetDTO budgetDTO) {        // budgetType string to enum
+    public void addBudget(BudgetDTO budgetDTO) {
 
         Budget budget = null;
         try {
             if(budgetDTO == null ||
                 (budgetDTO.getBudgetAmount() == null && this.validateBigDecimal(budgetDTO.getBudgetAmount(),10, 2)) ||
-                budgetDTO.getBudgetType() instanceof String && (budgetDTO.getBudgetType().isEmpty() || budgetDTO.getBudgetType().length() > 30) ||
+                !(budgetDTO.getBudgetType() instanceof BudgetType) ||
                 budgetDTO.getCategoryId() == null) {
                     
                     throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             }
+            budgetDTO.setIsActive(budgetDTO.getIsActive() instanceof Boolean ? budgetDTO.getIsActive() : true);
+
             budget = this.mapBudgetDTOToBudget(budgetDTO);
             budgetRepository.saveAndFlush(budget);
         }
@@ -96,19 +99,17 @@ public class BudgetService {
         }
     }
 
-    public void updateBudget(Long adminId, BudgetDTO updatedBudgetDTO) {
+    public void updateBudget(BudgetDTO updatedBudgetDTO) {
 
         Budget existingBudget = null;
         try {
-            if(adminVerification.isAdmin(adminId)) {
-                existingBudget = budgetRepository.findBudgetById(updatedBudgetDTO.getBudgetId());
-            }
+            existingBudget = budgetRepository.findBudgetById(updatedBudgetDTO.getBudgetId());
             
             if(existingBudget == null) {
                 throw new ValidationException("No record found to update for the budget id " + updatedBudgetDTO.getBudgetId(), HttpStatus.NOT_FOUND);
             }
 
-            if(updatedBudgetDTO.getBudgetType() instanceof String || ! (updatedBudgetDTO.getBudgetType().isEmpty())) {
+            if(updatedBudgetDTO.getBudgetType() instanceof BudgetType) {
                 existingBudget.setBudgetType(updatedBudgetDTO.getBudgetType());
             }
 

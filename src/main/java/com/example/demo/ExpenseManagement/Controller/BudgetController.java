@@ -45,10 +45,10 @@ public class BudgetController {
     }
 
     //admin's access
-    @PutMapping("/{adminId}")
-    public ResponseEntity<Void> updateBudget(@PathVariable("adminId") Long adminId, @RequestBody BudgetDTO budgetDTO) {
+    @PutMapping()
+    public ResponseEntity<Void> updateBudget(@RequestBody BudgetDTO budgetDTO) {
 
-        budgetService.updateBudget(adminId, budgetDTO);
+        budgetService.updateBudget(budgetDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

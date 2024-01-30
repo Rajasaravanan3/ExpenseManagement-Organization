@@ -20,6 +20,9 @@ public class PaymentMethod {
     @Column(name = "payment_method_description")
     private String paymentMethodDescription;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     public PaymentMethod() {}
 
     public PaymentMethod(Integer paymentMethodId, String paymentMethodName, String paymentMethodDescription) {
@@ -50,6 +53,14 @@ public class PaymentMethod {
 
     public void setPaymentMethodDescription(String paymentMethodDescription) {
         this.paymentMethodDescription = paymentMethodDescription;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
     
 }

@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,8 +24,9 @@ public class Budget {
     @Column(name = "budget_amount")
     private BigDecimal budgetAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "budget_type")
-    private String budgetType;
+    private BudgetType budgetType;
 
     @Column(name = "created_date")
     private ZonedDateTime createdTime;
@@ -40,7 +43,7 @@ public class Budget {
 
     public Budget() {}
 
-    public Budget(Long budgetId, BigDecimal budgetAmount, String budgetType, ZonedDateTime createdTime,
+    public Budget(Long budgetId, BigDecimal budgetAmount, BudgetType budgetType, ZonedDateTime createdTime,
             ZonedDateTime modifiedTime, Boolean isActive, Category category) {
         this.budgetId = budgetId;
         this.budgetAmount = budgetAmount;
@@ -67,11 +70,11 @@ public class Budget {
         this.budgetAmount = budgetAmount;
     }
 
-    public String getBudgetType() {
+    public BudgetType getBudgetType() {
         return budgetType;
     }
 
-    public void setBudgetType(String budgetType) {
+    public void setBudgetType(BudgetType budgetType) {
         this.budgetType = budgetType;
     }
 
