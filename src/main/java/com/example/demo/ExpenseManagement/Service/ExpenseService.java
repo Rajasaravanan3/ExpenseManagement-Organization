@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.time.ZoneId;
@@ -17,6 +18,7 @@ import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
 import com.example.demo.ExpenseManagement.Entity.ApprovalStatus;
 import com.example.demo.ExpenseManagement.Entity.Budget;
 import com.example.demo.ExpenseManagement.Entity.Expense;
+import com.example.demo.ExpenseManagement.Entity.Role;
 import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
@@ -386,8 +388,14 @@ public class ExpenseService {
         User approver = null;
         try {
             approver = userRepository.findUserById(userId);
-            if(approver != null && approver.getRole().getIsApprover()) {
-                return true;
+            if(approver != null) {
+                Set<Role> roles = approver.getRoles();
+
+                for (Role role : roles) {
+                    if(role.getRoleName().equals("APPROVER"))
+                        return true;
+                }
+                return false;
             }
             else {
                 throw new ValidationException("Access denied", HttpStatus.FORBIDDEN);

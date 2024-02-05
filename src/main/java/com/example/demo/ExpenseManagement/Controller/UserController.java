@@ -13,7 +13,6 @@ import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -32,15 +31,9 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<UserDTO> getUserByEmail(@RequestParam("email") String email) {
-        return new ResponseEntity<>(userService.getUserByEmail(email), HttpStatus.OK);
-    }
+    public ResponseEntity<UserDTO> getUserByUsername(@RequestParam("username") String username) {
 
-    @PostMapping
-    public ResponseEntity<Void> addUser(@RequestBody UserDTO userDTO) {
-
-        userService.addUser(userDTO);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.OK);
     }
 
     @PutMapping
@@ -62,15 +55,14 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    //get users by role name
-    //admin's access
-    @GetMapping("/role")
-    public ResponseEntity<List<UserDTO>> getUsersByRoleName(@RequestParam("organizationId") Long organizationId, @RequestParam("roleName") String roleName) {
-        
-        List<UserDTO> userDTOList = userService.getUsersByRoleName(organizationId, roleName);
-        if(userDTOList != null) {
-            return new ResponseEntity<>(userDTOList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    // public ResponseEntity<List<UserDTO>> getAllUsers(@RequestHeader(name = "Authorization") String authorizationHeader) {
+
+    //     System.out.println("-------------------------" + authorizationHeader);
+
+    //     List<UserDTO> userDTOList = userService.getAllUsers(authorizationHeader);
+    //     if(userDTOList != null) {
+    //         return new ResponseEntity<>(userDTOList, HttpStatus.OK);
+    //     }
+    //     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    // }
 }

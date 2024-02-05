@@ -2,7 +2,6 @@ drop database Expense_management;
 create database Expense_management;
 use Expense_management;
 
-
 create table Address(
 	address_id bigint unsigned auto_increment primary key,
     street varchar(30),
@@ -23,22 +22,27 @@ create table Organization(
 
 create table Role(
 	role_id bigint unsigned auto_increment primary key,
-    role_name varchar(40) unique not null,
+    role_name varchar(50) unique not null,
     role_description varchar(300),
-    is_active boolean default true,
-    is_approver boolean default false
+    is_active boolean default true
 );
 
 create table user(
 	user_id bigint unsigned auto_increment primary key,
-    user_name varchar(50) not null,
-    role_id bigint unsigned not null,
+    full_name varchar(50) not null,
     user_email varchar(350) unique not null,
     user_password varchar(130) not null,
     is_active boolean default true,
     organization_id bigint unsigned not null,
-    foreign key (role_id) references role(role_id),
     foreign key (organization_id) references organization(organization_id)
+);
+
+CREATE TABLE user_role (
+    user_role_id bigint unsigned auto_increment primary key,
+    user_id bigint unsigned,
+    role_id bigint unsigned,
+    foreign key (user_id) references user(user_id),
+    foreign key (role_id) references role(role_id)
 );
 
 create table currency(
@@ -132,32 +136,48 @@ VALUES
 (9, 'CompanyI', 'Org606', 9, true),
 (10, 'CompanyJ', 'Org707', 10, true);
 
-INSERT INTO role (role_id, role_name, role_description, is_approver)
-VALUES
-(1, 'Admin', 'System Administrator', true),
-(2, 'Manager', 'Department Manager', true),
-(3, 'Employee', 'Regular Employee', false),
-(4, 'Supervisor', 'Team Supervisor', false),
-(5, 'Analyst', 'Data Analyst', false),
-(6, 'Developer', 'Software Developer', false),
-(7, 'FinanceManager', 'Finance Manager', false),
-(8, 'HRManager', 'HR Manager', false),
-(9, 'MarketingManager', 'Marketing Manager', false),
-(10, 'SalesManager', 'Sales Manager', false);
+INSERT INTO role (role_id, role_name, role_description, is_active) VALUES
+(1, 'ADMIN', 'Administrator', true),
+(2, 'MANAGER', 'Manager', true),
+(3, 'HR', 'Human Resources', true),
+(4, 'DEVELOPER', 'Developer', true),
+(5, 'TESTER', 'Tester', true),
+(6, 'TL', 'Team Lead', true),
+(7, 'APPROVER', 'Approver', true),
+(8, 'ANALYST', 'Data Analyst', false),
+(9, 'FINANCEMANAGER', 'Finance Manager', false),
+(10, 'MARKETINGMANAGER', 'Marketing Manager', false);
 
 
-INSERT INTO user (user_id, user_name, role_id, user_email, user_password, is_active, organization_id)
+INSERT INTO user (user_id, full_name, user_email, user_password, is_active, organization_id)
 VALUES
-(1, 'John Doe', 1, 'john@example.com', 'hashedpassword1', true, 1),
-(2, 'Jane Smith', 2, 'jane@example.com', 'hashedpassword2', true, 2),
-(3, 'Bob Johnson', 3, 'bob@example.com', 'hashedpassword3', true, 3),
-(4, 'Alice Williams', 4, 'alice@example.com', 'hashedpassword4', true, 4),
-(5, 'Charlie Brown', 5, 'charlie@example.com', 'hashedpassword5', true, 5),
-(6, 'Eva Davis', 6, 'eva@example.com', 'hashedpassword6', true, 6),
-(7, 'Frank Wilson', 7, 'frank@example.com', 'hashedpassword7', true, 7),
-(8, 'Grace Moore', 8, 'grace@example.com', 'hashedpassword8', true, 8),
-(9, 'Henry Lee', 9, 'henry@example.com', 'hashedpassword9', true, 9),
-(10, 'Ivy Clark', 10, 'ivy@example.com', 'hashedpassword10', true, 10);
+(1, 'John Doe', 'john@example.com', 'hashedpassword1', true, 1),
+(2, 'Jane Smith', 'jane@example.com', 'hashedpassword2', true, 1),
+(3, 'Bob Johnson', 'bob@example.com', 'hashedpassword3', true, 1),
+(4, 'Alice Williams', 'alice@example.com', 'hashedpassword4', true, 1),
+(5, 'Charlie Brown', 'charlie@example.com', 'hashedpassword5', true, 1),
+(6, 'Eva Davis', 'eva@example.com', 'hashedpassword6', true, 1),
+(7, 'Frank Wilson', 'frank@example.com', 'hashedpassword7', true, 1),
+(8, 'Grace Moore', 'grace@example.com', 'hashedpassword8', true, 1),
+(9, 'Henry Lee', 'henry@example.com', 'hashedpassword9', true, 1),
+(10, 'Ivy Clark', 'ivy@example.com', 'hashedpassword10', true, 1);
+
+
+INSERT INTO user_role (user_role_id, user_id, role_id)
+VALUES
+(1, 1, 1),
+(2, 2, 2),
+(3, 2, 7),
+(4, 3, 3),
+(5, 3, 7),
+(6, 4, 4),
+(7, 5, 5),
+(8, 6, 4),
+(9, 7, 3),
+(10, 8, 6),
+(11, 9, 4),
+(12, 10, 6);
+
 
 INSERT INTO currency (currency_id, currency_code, currency_name)
 VALUES

@@ -1,14 +1,22 @@
 package com.example.demo.ExpenseManagement.Entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.springframework.security.core.GrantedAuthority;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 
 @Entity
-public class Role {
-    
+public class Role implements GrantedAuthority {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
@@ -23,16 +31,23 @@ public class Role {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    @Column(name = "is_approver")
-    private Boolean isApprover;
+    @ManyToMany(mappedBy = "roles")
+    @JsonIgnoreProperties("roles")
+    private Set<User> users = new HashSet<>();
+
+    @Override
+    public String getAuthority() {
+        return this.roleName;
+    }
 
     public Role() {}
 
-    public Role(Long roleId, String roleName, String roleDescription, Boolean isApprover) {
+    public Role(Long roleId, String roleName, String roleDescription, Boolean isActive, Set<User> users) {
         this.roleId = roleId;
         this.roleName = roleName;
         this.roleDescription = roleDescription;
-        this.isApprover = isApprover;
+        this.isActive = isActive;
+        this.users = users;
     }
 
     public Long getRoleId() {
@@ -67,12 +82,11 @@ public class Role {
         this.isActive = isActive;
     }
 
-    public Boolean getIsApprover() {
-        return isApprover;
+    public Set<User> getUsers() {
+        return users;
     }
 
-    public void setIsApprover(Boolean isApprover) {
-        this.isApprover = isApprover;
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
-
 }

@@ -1,33 +1,74 @@
 package com.example.demo.ExpenseManagement.DTO;
 
-public class UserDTO {
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.example.demo.ExpenseManagement.Entity.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+public class UserDTO implements UserDetails {
     
     private Long userId;
 
-    private String userName;
+    private String fullName;
 
-    private String userEmail;
+    private String username;
 
-    private String userPassword;
+    private String password;
 
     private Boolean isActive;
 
-    private Long roleId;
-
     private Long organizationId;
 
-    public UserDTO() {
-    }
+    @JsonIgnoreProperties("users")
+    private Set<Role> roles;
 
-    public UserDTO(Long userId, String userName, String userEmail, String userPassword, Boolean isActive, Long roleId,
+    public UserDTO() {}
+
+    public UserDTO(Long userId, String fullName, String userEmail, String password, Boolean isActive, Set<Role> roles,
             Long organizationId) {
         this.userId = userId;
-        this.userName = userName;
-        this.userEmail = userEmail;
-        this.userPassword = userPassword;
+        this.fullName = fullName;
+        this.username = userEmail;
+        this.password = password;
         this.isActive = isActive;
-        this.roleId = roleId;
+        this.roles = roles;
         this.organizationId = organizationId;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : this.roles) {
+            authorities.add(new SimpleGrantedAuthority(role.getRoleName()));
+        }
+        return authorities;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public Long getUserId() {
@@ -38,28 +79,30 @@ public class UserDTO {
         this.userId = userId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getUserEmail() {
-        return userEmail;
+    @Override
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getUserPassword() {
-        return userPassword;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public void setUserPassword(String userPassword) {
-        this.userPassword = userPassword;
+    public void setPassword(String passwordassword) {
+        this.password = passwordassword;
     }
 
     public Boolean getIsActive() {
@@ -70,12 +113,12 @@ public class UserDTO {
         this.isActive = isActive;
     }
 
-    public Long getRoleId() {
-        return roleId;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public Long getOrganizationId() {
@@ -85,5 +128,7 @@ public class UserDTO {
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
     }
+
     
+
 }
