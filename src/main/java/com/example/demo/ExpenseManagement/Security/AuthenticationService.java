@@ -97,8 +97,14 @@ public class AuthenticationService {
 
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         try {
+            if(signInRequest == null ||
+            (signInRequest.getUsername() instanceof String && (signInRequest.getUsername().isEmpty() || signInRequest.getUsername().length() > 350)) ||
+            (signInRequest.getPassword() instanceof String && (signInRequest.getPassword().isEmpty() || signInRequest.getPassword().length() > 130))) {
+                throw new ValidationException("credentials cannot be null or exceed limit", HttpStatus.BAD_REQUEST);
+            }
+
             User user = userRepository.findByUsername(signInRequest.getUsername());
-            if (user == null) {
+            if (user == null || !user.getPassword().equals(signInRequest.getPassword())) {
                 throw new ValidationException("Invalid email or password", HttpStatus.UNAUTHORIZED);
             }
 

@@ -29,7 +29,6 @@ public class AuthenticationController {
 
     @PostMapping("/signin")
     public ResponseEntity<JwtAuthenticationResponse> signIn(@RequestBody SignInRequest signInRequest) throws Exception {
-        System.out.println("--------------------------------");
         return new ResponseEntity<>(authenticationService.signIn(signInRequest), HttpStatus.OK);
     }
 

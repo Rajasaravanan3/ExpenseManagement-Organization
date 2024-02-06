@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,9 +42,9 @@ public class ExpenseController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteExpense(@RequestParam("expenseId") Long expenseId, @RequestParam("userId") Long userId) {
+    public ResponseEntity<Void> deleteExpense(@RequestParam("expenseId") Long expenseId, @RequestHeader(name = "Authorization") String authorizationHeader) {
 
-        expenseService.deleteExpense(expenseId, userId);
+        expenseService.deleteExpense(expenseId, authorizationHeader);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -108,27 +109,13 @@ public class ExpenseController {
     }
 
 
-
-    
-    //admin's access
-
-    //get users working for the organization
-    //get all approvals done by an user(approver)
-    // get users by roleName
-    //update category
-    //update budget
-    //update approver
-    
-
-
-
     //approver's accesss
     
     //get recent expenses for the organization
-    @GetMapping("/approver/{approverId}/recent-expenses")
-    public ResponseEntity<List<ExpenseDTO>> getByRecentExpenses(@PathVariable("approverId") Long approverId, @RequestParam("organizationId") Long organizationId) {
+    @GetMapping("/approver/recent-expenses")
+    public ResponseEntity<List<ExpenseDTO>> getByRecentExpenses(@RequestParam("organizationId") Long organizationId) {
 
-        List<ExpenseDTO> expenseDtoList = expenseService.getRecentExpenses(approverId, organizationId);
+        List<ExpenseDTO> expenseDtoList = expenseService.getRecentExpenses(organizationId);
         if(expenseDtoList != null) {
             return new ResponseEntity<>(expenseDtoList, HttpStatus.OK);
         }
@@ -136,10 +123,10 @@ public class ExpenseController {
     }
 
     //get expenses by approval status
-    @GetMapping("/approver/{approverId}/approval-status")
-    public ResponseEntity<List<ExpenseDTO>> getExpensesByStatus(@PathVariable("approverId") Long approverId, @RequestParam("organizationId") Long organizationId, @RequestParam("approvalStatus") ApprovalStatus approvalStatus) {
+    @GetMapping("/approver/approval-status")
+    public ResponseEntity<List<ExpenseDTO>> getExpensesByStatus(@RequestParam("organizationId") Long organizationId, @RequestParam("approvalStatus") ApprovalStatus approvalStatus) {
 
-        List<ExpenseDTO> expenseDtoList = expenseService.getExpensesByStatus(approverId, organizationId, approvalStatus);
+        List<ExpenseDTO> expenseDtoList = expenseService.getExpensesByStatus(organizationId, approvalStatus);
         if(expenseDtoList != null) {
             return new ResponseEntity<>(expenseDtoList, HttpStatus.OK);
         }

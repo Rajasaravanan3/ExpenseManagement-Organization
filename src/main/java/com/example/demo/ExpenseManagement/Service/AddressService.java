@@ -8,12 +8,16 @@ import com.example.demo.ExpenseManagement.Entity.Address;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.AddressRepository;
+import com.example.demo.ExpenseManagement.Security.JWTService;
 
 @Service
 public class AddressService {
     
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private JWTService jwtService;
 
     public Address getAddressById(Long addressId) {
 

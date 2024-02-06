@@ -1,5 +1,7 @@
 package com.example.demo.ExpenseManagement.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +29,7 @@ public class Organization {
 
     @OneToOne
     @JoinColumn(name = "address_id", referencedColumnName = "address_id")
+    @JsonIgnoreProperties("address")
     private Address address;
 
     public Organization() {}

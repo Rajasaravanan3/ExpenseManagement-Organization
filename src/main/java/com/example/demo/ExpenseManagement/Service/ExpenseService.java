@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 
 import com.example.demo.ExpenseManagement.DTO.ApprovalsDTO;
 import com.example.demo.ExpenseManagement.DTO.ExpenseDTO;
+import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Entity.ApprovalStatus;
 import com.example.demo.ExpenseManagement.Entity.Budget;
 import com.example.demo.ExpenseManagement.Entity.Expense;
@@ -26,6 +27,7 @@ import com.example.demo.ExpenseManagement.Repository.BudgetRepository;
 import com.example.demo.ExpenseManagement.Repository.CategoryRepository;
 import com.example.demo.ExpenseManagement.Repository.ExpenseRepository;
 import com.example.demo.ExpenseManagement.Repository.UserRepository;
+import com.example.demo.ExpenseManagement.Security.JWTService;
 
 @Service
 public class ExpenseService {
@@ -59,6 +61,9 @@ public class ExpenseService {
 
     @Autowired
     private ApprovalsService approvalsService;
+
+    @Autowired
+    private JWTService jwtService;
     
     public ExpenseDTO getExpenseById(Long expenseId) {
         
@@ -115,16 +120,21 @@ public class ExpenseService {
         }
     }
 
-    public void deleteExpense(long expenseId, Long userId) {
+    public void deleteExpense(long expenseId, String authHeader) {
 
         Expense existingExpense = null;
         try {
+            String username = jwtService.extractUserName(authHeader.substring(7));
+            UserDTO userDTO = userService.getUserByUsername(username);
             if(this.getExpenseById(expenseId).getApprovalStatus() != ApprovalStatus.NOT_APPROVED) {
                 throw new ValidationException("Your expense has already been either approved or rejected", HttpStatus.FORBIDDEN);
             }
             existingExpense = expenseRepository.findExpenseById(expenseId);
-            if(this.getExpenseById(expenseId) != null && existingExpense.getUser().getUserId().equals(userId)) {
+            if(this.getExpenseById(expenseId) != null &&userDTO != null && existingExpense.getUser().getUserId().equals(userDTO.getUserId())) {
                 expenseRepository.deleteById(expenseId);
+            }
+            else {
+                throw new ValidationException("Only the person who created the expense can delete", HttpStatus.FORBIDDEN);
             }
         }
         catch (ValidationException e) {
@@ -307,13 +317,11 @@ public class ExpenseService {
 
 
     //approver's access
-    public List<ExpenseDTO> getRecentExpenses(Long approverId, Long organizationId) {
+    public List<ExpenseDTO> getRecentExpenses(Long organizationId) {
 
         List<Expense> expenseList = null;
         try {
-            if(this.isApprover(approverId)) {
-                expenseList = expenseRepository.findByDate(organizationId);
-            }
+            expenseList = expenseRepository.findByDate(organizationId);
             
             String notFoundMessage = "No expense found";
             return this.getExpenses(expenseList, notFoundMessage);
@@ -326,15 +334,13 @@ public class ExpenseService {
         }
     }
 
-    public List<ExpenseDTO> getExpensesByStatus(Long approverId, Long organizationId, ApprovalStatus approvalStatus) {
+    public List<ExpenseDTO> getExpensesByStatus(Long organizationId, ApprovalStatus approvalStatus) {
         
         List<Expense> expenseList = new ArrayList<>();
         List<ExpenseDTO> expenseDTOList = new ArrayList<>();
         try {
-            if(this.isApprover(approverId)) {
-                expenseList = expenseRepository.findExpensesByStatus(organizationId, approvalStatus);
-                expenseDTOList = this.getExpenses(expenseList, "No expenses found with the approval status " + approvalStatus);
-            }
+            expenseList = expenseRepository.findExpensesByStatus(organizationId, approvalStatus);
+            expenseDTOList = this.getExpenses(expenseList, "No expenses found with the approval status " + approvalStatus);
             return expenseDTOList;
         }
         catch(ValidationException e) {
@@ -350,7 +356,7 @@ public class ExpenseService {
         Expense existingExpense = null;
         List<ApprovalsDTO> approvalList = new ArrayList<>();
         try {
-            if(this.isApprover(approverId) && this.getExpenseById(expenseId) != null) {
+            if(this.getExpenseById(expenseId) != null) {
                 ApprovalStatus approvalStatus;
                 
                 existingExpense = expenseRepository.findExpenseById(expenseId);

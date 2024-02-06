@@ -35,10 +35,17 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/all/**").hasAnyAuthority("ADMIN")
-                        .requestMatchers("/users**").permitAll()
-                        // .requestMatchers(HttpMethod.POST, "/**").hasAnyAuthority("ADMIN")
-                        // .requestMatchers(HttpMethod.POST, "/**").hasAnyAuthority("APPROVER")
+                        .requestMatchers(HttpMethod.GET, "/currencies/**", "/categories/**", "/budgets/**").permitAll()
+                        .requestMatchers("/users/all/**", "/addresses", "/paymentMethods", "/currencies", "/categories", "/budgets", "/approvals/**").hasAuthority("ADMIN")
+
+                        .requestMatchers("/expenses/approver/**").hasAnyAuthority("APPROVER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/paymentMethods/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/organizations").hasAuthority("ADMIN")
+
+                        .requestMatchers("/users**", "/addresses/**", "/organization**", "/expenses**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/roles**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

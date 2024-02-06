@@ -8,6 +8,8 @@ import java.util.function.Function;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.ExpenseManagement.Entity.User;
+import java.util.List;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,20 +19,24 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JWTService {
 
-    public String generateAccessToken(UserDetails userDetails) {
+    public String generateAccessToken(User user) {
 
-        return Jwts.builder().setSubject(userDetails.getUsername())
+        return Jwts.builder().setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .claim("organizationId", user.getOrganization().getOrganizationId())
+                .claim("roles", user.getAuthorities())
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateRefreshToken(Map<String, Object> extraClaims, User user) {
 
-        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+        return Jwts.builder().setClaims(extraClaims).setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 7))
+                .claim("organizationId", user.getOrganization().getOrganizationId())
+                .claim("roles", user.getAuthorities())
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -45,9 +51,13 @@ public class JWTService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // public Long extractOrganizationId(String token) {
-    //     return (extractClaim(token, claims -> claims.get("organizationId", Long.class)));
-    // }
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get("roles", List.class));
+    }
+
+    public Long extractOrganizationId(String token) {
+        return extractClaim(token, claims -> claims.get("organizationId", Long.class));
+    }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
 

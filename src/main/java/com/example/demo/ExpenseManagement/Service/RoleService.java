@@ -3,6 +3,7 @@ package com.example.demo.ExpenseManagement.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,15 +14,19 @@ import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.RoleRepository;
+import com.example.demo.ExpenseManagement.Security.JWTService;
 
 @Service
 public class RoleService {
 
     @Autowired
     private RoleRepository roleRepository;
+    
+    @Autowired
+    private ModelMapper mapper;
 
     @Autowired
-    private UserService userService;
+    private JWTService jwtService;
     
     public Role getRoleById(Long roleId) {
         
@@ -43,7 +48,9 @@ public class RoleService {
         return role;
     }
 
-    public List<UserDTO> getUsersByRoleName(Long organizationId, String roleName) {
+    public List<UserDTO> getUsersByRoleName(Long organizationId, String roleName, String authorizationHeader) {
+
+        this.checkSameOrganization(organizationId, authorizationHeader);
         List<User> users = new ArrayList<>();
         List<UserDTO> userDTOList = new ArrayList<>();
         try {
@@ -54,7 +61,7 @@ public class RoleService {
             }
 
             for (User user : users) {
-                userDTOList.add(userService.mapUserToUserDTO(user));
+                userDTOList.add(this.mapUserToUserDTO(user));
             }
             return userDTOList;
         }
@@ -75,6 +82,7 @@ public class RoleService {
 
                 throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
             }
+            role.setRoleName(role.getRoleName().toUpperCase());
             roleRepository.saveAndFlush(role);
         }
         catch (ValidationException e) {
@@ -99,7 +107,7 @@ public class RoleService {
 
                 if(updatedRole.getRoleName().length() > 50)
                     throw new ValidationException("Role name must not exceed 50 characters", HttpStatus.BAD_REQUEST);
-                existingRole.setRoleName(updatedRole.getRoleName());
+                existingRole.setRoleName(updatedRole.getRoleName().toUpperCase());
             }
 
             if(updatedRole.getRoleDescription() instanceof String && ! (updatedRole.getRoleDescription().isEmpty())) {
@@ -122,4 +130,25 @@ public class RoleService {
             throw new ApplicationException("An unexpected error occurred while updating the role.");
         }
     }
+
+    public UserDTO mapUserToUserDTO(User user) {
+
+        UserDTO userDTO = mapper.map(user, UserDTO.class);
+        userDTO.setOrganizationId(user.getOrganization().getOrganizationId());
+        return userDTO;
+    }
+
+    public boolean checkSameOrganization(Long pathOrganizationId, String authHeader) {
+        
+        try {
+            if(! pathOrganizationId.equals(jwtService.extractOrganizationId(authHeader.substring(7)))) {
+                throw new ValidationException("Organization mismatch", HttpStatus.FORBIDDEN);
+            }
+            return true;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+    }
+
 }

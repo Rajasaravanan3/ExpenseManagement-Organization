@@ -1,5 +1,8 @@
 package com.example.demo.ExpenseManagement.Service;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,9 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.ExpenseManagement.DTO.OrganizationDTO;
 import com.example.demo.ExpenseManagement.Entity.Organization;
+import com.example.demo.ExpenseManagement.Entity.Role;
+import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.OrganizationRepository;
+import com.example.demo.ExpenseManagement.Repository.UserRepository;
+import com.example.demo.ExpenseManagement.Security.JWTService;
 
 @Service
 public class OrganizationService {
@@ -22,6 +29,15 @@ public class OrganizationService {
 
     @Autowired
     private AddressService addressService;
+
+    @Autowired
+    private JWTService jwtService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public OrganizationDTO getOrganizationById(Long organizationId) {
         
@@ -56,6 +72,17 @@ public class OrganizationService {
             organization = this.mapOrganizationDTOToOrganization(organizationDTO);
             organization.setAddress(addressService.getAddressById(organizationDTO.getAddressId()));
             organizationRepository.saveAndFlush(organization);
+
+            User user = new User();
+            user.setFullName("AdminOf" + organizationDTO.getOrganizationName());
+            user.setIsActive(true);
+            user.setUsername("admin@" + organizationDTO.getOrganizationName() + ".in");
+            user.setPassword("DefaultAdminFor" + organizationDTO.getOrganizationName());
+            user.setOrganization(organization);
+            Set<Role> roles = new HashSet<Role>();
+            roles.add(roleService.getRoleById(Long.valueOf(1)));
+            user.setRoles(roles);
+            userRepository.save(user);
         }
         catch (ValidationException e) {
             throw e;
@@ -120,5 +147,18 @@ public class OrganizationService {
         Organization organization = mapper.map(organizationDTO, Organization.class);
         organization.setAddress(addressService.getAddressById(organizationDTO.getAddressId()));
         return organization;
+    }
+
+    public boolean checkSameOrganization(Long pathOrganizationId, String authHeader) {
+        
+        try {
+            if(! pathOrganizationId.equals(jwtService.extractOrganizationId(authHeader.substring(7)))) {
+                throw new ValidationException("Organization mismatch", HttpStatus.FORBIDDEN);
+            }
+            return true;
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
     }
 }
