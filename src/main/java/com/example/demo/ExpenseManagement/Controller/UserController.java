@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.ExpenseManagement.DTO.RoleUpdate;
 import com.example.demo.ExpenseManagement.DTO.UserDTO;
 import com.example.demo.ExpenseManagement.Service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,17 +17,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    
+
     @Autowired
     private UserService userService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable("userId") Long userId) {
-        
+
         return new ResponseEntity<>(userService.getUserById(userId), HttpStatus.OK);
     }
 
@@ -43,26 +43,31 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //get users working for the organization
-    //admin's access
+    // get users working for an organization
+    // admin's access
     @GetMapping("/all")
     public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam("organizationId") Long organizationId) {
-        
+
         List<UserDTO> userDTOList = userService.getAllUsers(organizationId);
-        if(userDTOList != null) {
+        if (userDTOList != null) {
             return new ResponseEntity<>(userDTOList, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // public ResponseEntity<List<UserDTO>> getAllUsers(@RequestHeader(name = "Authorization") String authorizationHeader) {
+    // admin's access
+    @PutMapping("/add-role")
+    public ResponseEntity<Void> addRoleToUser(@RequestBody RoleUpdate roleUpdate) {
 
-    //     System.out.println("-------------------------" + authorizationHeader);
+        userService.addRoleToUser(roleUpdate);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-    //     List<UserDTO> userDTOList = userService.getAllUsers(authorizationHeader);
-    //     if(userDTOList != null) {
-    //         return new ResponseEntity<>(userDTOList, HttpStatus.OK);
-    //     }
-    //     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    // }
+    // admin's access
+    @PutMapping("/remove-role")
+    public ResponseEntity<Void> removeRoleFromUser(@RequestBody RoleUpdate roleUpdate) {
+
+        userService.removeRoleFromUser(roleUpdate);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

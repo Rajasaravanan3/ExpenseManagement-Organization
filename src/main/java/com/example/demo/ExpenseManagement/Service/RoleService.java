@@ -27,6 +27,9 @@ public class RoleService {
 
     @Autowired
     private JWTService jwtService;
+
+    @Autowired
+    private ActiveStatus activeStatus;
     
     public Role getRoleById(Long roleId) {
         
@@ -35,9 +38,7 @@ public class RoleService {
             role = roleRepository.findRoleById(roleId);
             if(role == null)
                 throw new ValidationException("No record found for the roleId " + roleId, HttpStatus.NOT_FOUND);
-            if(!role.getIsActive()) {
-                throw new ValidationException("This role is not active right now", HttpStatus.FORBIDDEN);
-            }
+            activeStatus.isActiveOrNot(role.getIsActive());
         }
         catch (ValidationException e) {
             throw e;
@@ -61,6 +62,8 @@ public class RoleService {
             }
 
             for (User user : users) {
+                if(!activeStatus.isActiveOrNot(user.getIsActive())) continue;
+                
                 userDTOList.add(this.mapUserToUserDTO(user));
             }
             return userDTOList;

@@ -39,6 +39,9 @@ public class OrganizationService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ActiveStatus activeStatus;
+
     public OrganizationDTO getOrganizationById(Long organizationId) {
         
         Organization organization = null;
@@ -48,6 +51,7 @@ public class OrganizationService {
             if(organization == null) {
                 throw new ValidationException("No record found for the organization Id " + organizationId, HttpStatus.NOT_FOUND);
             }
+            activeStatus.isActiveOrNot(organization.getIsActive());
             return this.mapOrganizationToOrganizationDTO(organization);
         }
         catch (ValidationException e) {

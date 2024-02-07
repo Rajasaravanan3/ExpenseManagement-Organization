@@ -64,7 +64,11 @@ public class ExpenseController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // get expense list by amount higher to lower
+    /**
+     * get expense list by amount higher to lower
+     * @param organizationId
+     * @return
+     */
     @GetMapping("/filters/amount-spent")
     public ResponseEntity<List<ExpenseDTO>> getByAmountSpentHigherToLower(@RequestParam("organizationId") Long organizationId) {
 

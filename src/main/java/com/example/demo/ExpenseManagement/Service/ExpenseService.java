@@ -89,13 +89,28 @@ public class ExpenseService {
         Expense expense = null;
         String notification = "";
         try {
-            if(expenseDTO == null || !(expenseDTO.getCurrencyId() instanceof Integer) || !(expenseDTO.getUserId() instanceof Long) ||
-                !(expenseDTO.getPaymentMethodId() instanceof Integer) || !(expenseDTO.getCategoryId() instanceof Long) ||
-                (!(expenseDTO.getAmount() instanceof BigDecimal) && validateBigDecimal(expenseDTO.getAmount(), 10, 2)) ||
-                (!(expenseDTO.getExpenseDescription() instanceof String) && (expenseDTO.getExpenseDescription().isEmpty() || expenseDTO.getExpenseDescription().length() > 1000))) {
-
-                    throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
+            if(expenseDTO == null) {
+                throw new ValidationException("Expense details must not be empty.", HttpStatus.BAD_REQUEST);
             }
+            if(expenseDTO.getCurrencyId() == null) {
+                throw new ValidationException("currencyId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(expenseDTO.getUserId() == null) {
+                throw new ValidationException("UserId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(expenseDTO.getPaymentMethodId() == null) {
+                throw new ValidationException("paymentMethodId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(expenseDTO.getCategoryId() == null) {
+                throw new ValidationException("categoryId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(expenseDTO.getAmount() == null || validateBigDecimal(expenseDTO.getAmount(), 10, 2)) {
+                throw new ValidationException("Amount must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(expenseDTO.getExpenseDescription() == null || expenseDTO.getExpenseDescription().isEmpty() || expenseDTO.getExpenseDescription().length() > 1000) {
+                throw new ValidationException("Expense description must not be null and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
+            }
+
             if(paymentMethodService.getPaymentMethodById(expenseDTO.getPaymentMethodId()) != null &&
                 currencyService.getCurrencyById(expenseDTO.getCurrencyId()) != null &&
                 categoryService.getCategoryById(expenseDTO.getCategoryId()) != null &&
@@ -360,9 +375,9 @@ public class ExpenseService {
                 ApprovalStatus approvalStatus;
                 
                 existingExpense = expenseRepository.findExpenseById(expenseId);
-                approvalList = approvalsService.getByExpenseId(expenseId);
+                approvalList = approvalsService.getApprovalsByExpenseId(expenseId);
 
-                if(Boolean.TRUE.equals(statusMessage)) {
+                if(statusMessage) {
                     if(approvalList.isEmpty()) {
                         approvalStatus = ApprovalStatus.PARTIAL;
                     }

@@ -15,6 +15,9 @@ public class CurrencyService {
     @Autowired
     private CurrencyRepository currencyRepository;
 
+    @Autowired
+    private ActiveStatus activeStatus;
+
     public Currency getCurrencyById(Integer currencyId) {
         
         Currency currency = null;
@@ -23,9 +26,7 @@ public class CurrencyService {
             if(currency == null) {
                 throw new ValidationException("No record found for the currencyId " + currencyId, HttpStatus.NOT_FOUND);
             }
-            if(currency.getIsActive() == false) {
-                throw new ValidationException("The currency id " + currencyId + " is inactive", HttpStatus.FORBIDDEN);
-            }
+            activeStatus.isActiveOrNot(currency.getIsActive());
         }
         catch (ValidationException e) {
             throw e;

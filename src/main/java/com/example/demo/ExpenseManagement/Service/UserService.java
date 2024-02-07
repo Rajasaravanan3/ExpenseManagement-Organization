@@ -1,10 +1,11 @@
 package com.example.demo.ExpenseManagement.Service;
 
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
+import java.util.Set;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,13 +16,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.ExpenseManagement.DTO.RoleUpdate;
 import com.example.demo.ExpenseManagement.DTO.UserDTO;
+import com.example.demo.ExpenseManagement.Entity.Role;
 import com.example.demo.ExpenseManagement.Entity.User;
 import com.example.demo.ExpenseManagement.ExceptionController.ApplicationException;
 import com.example.demo.ExpenseManagement.ExceptionController.ValidationException;
 import com.example.demo.ExpenseManagement.Repository.OrganizationRepository;
 import com.example.demo.ExpenseManagement.Repository.UserRepository;
-import com.example.demo.ExpenseManagement.Security.JWTService;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -38,6 +40,12 @@ public class UserService implements UserDetailsService {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private ActiveStatus activeStatus;
+
     UserService() {}
     
     Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
@@ -53,6 +61,7 @@ public class UserService implements UserDetailsService {
             if(user == null) {
                 throw new ValidationException("No record found for userId " + userId, HttpStatus.NOT_FOUND);
             }
+            activeStatus.isActiveOrNot(user.getIsActive());
             return this.mapUserToUserDTO(user);
         }
         catch (ValidationException e) {
@@ -67,6 +76,7 @@ public class UserService implements UserDetailsService {
         User user = null;
         try {
             user = userRepository.findByUsername(username);
+            activeStatus.isActiveOrNot(user.getIsActive());
             return this.mapUserToUserDTO(user);
         }
         catch (ValidationException e) {
@@ -144,6 +154,8 @@ public class UserService implements UserDetailsService {
             
             users = userRepository.findAllUsers(organizationId);
             for (User user : users) {
+                if(!user.getIsActive()) continue;
+
                 userDTOList.add(this.mapUserToUserDTO(user));
             }
 
@@ -154,31 +166,66 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    // @Autowired
-    // private JWTService jwtService;
+    public void addRoleToUser(RoleUpdate roleUpdate) {
 
-    // public List<UserDTO> getAllUsers(String authHeader) {
+        try {
+            if(roleUpdate.getUserId() == null) {
+                throw new ValidationException("UserId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(roleUpdate.getRoleId() == null) {
+                throw new ValidationException("roleId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            this.getUserById(roleUpdate.getUserId());
+            Role role = roleService.getRoleById(roleUpdate.getRoleId());
+            User user = userRepository.findUserById(roleUpdate.getUserId());
+            Set<Role> roles = user.getRoles();
+            for (Role r : roles) {
+                if(r.getRoleName() == role.getRoleName()) {
+                    throw new ValidationException("User already holds " + role.getRoleName() + " role.", HttpStatus.CONFLICT);
+                }
+            }
+            roles.add(role);
+            user.setRoles(roles);
+            userRepository.save(user);
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occured occured while updating role to user " + roleUpdate.getUserId());
+        }
+    }
 
-    //     List<User> users = new ArrayList<>();
-    //     List<UserDTO> userDTOList = new ArrayList<>();
-    //     try {
-    //         System.out.println("-   ----------------------------");
-    //         Long id = jwtService.extractOrganizationId(authHeader.substring(7));
-    //         System.out.println("-   ----------------------------");
-    //         System.out.println(id);
-
-    //         users = userRepository.findAllUsers(id);
-    //         for (User user : users) {
-    //             userDTOList.add(this.mapUserToUserDTO(user));
-    //         }
-
-    //         return userDTOList;
-    //     } catch (Exception e) {
-    //         throw new ApplicationException(
-    //                 "An unexpected error occurred while retrieving all users working for the organization"
-    //                         + "");
-    //     }
-    // }
+    public void removeRoleFromUser(RoleUpdate roleUpdate) {
+        
+        try {
+            if(roleUpdate.getUserId() == null) {
+                throw new ValidationException("UserId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            if(roleUpdate.getRoleId() == null) {
+                throw new ValidationException("roleId must not be null", HttpStatus.BAD_REQUEST);
+            }
+            this.getUserById(roleUpdate.getUserId());
+            Role role = roleService.getRoleById(roleUpdate.getRoleId());
+            User user = userRepository.findUserById(roleUpdate.getUserId());
+            Set<Role> roles = user.getRoles();
+            for (Role r : roles) {
+                if(r.getRoleName() == role.getRoleName()) {
+                    roles.remove(role);
+                    user.setRoles(roles);
+                    userRepository.save(user);
+                    return;
+                }
+            }
+            throw new ValidationException("User don't have " + role.getRoleName() + " role.", HttpStatus.NOT_FOUND);
+        }
+        catch (ValidationException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new ApplicationException("An unexpected error occured occured while removing role from user " + roleUpdate.getUserId());
+        }
+    }
 
     public UserDTO mapUserToUserDTO(User user) {
 
@@ -193,8 +240,6 @@ public class UserService implements UserDetailsService {
         user.setOrganization(organizationRepository.findOrganizationById(userDTO.getOrganizationId()));
         return user;
     }
-
-
 
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 

@@ -29,6 +29,9 @@ public class CategoryService {
     @Autowired
     private OrganizationRepository organizationRepository;
 
+    @Autowired
+    private ActiveStatus activeStatus;
+
     public CategoryDTO getCategoryById(Long categoryId) {
         
         Category category = null;
@@ -37,9 +40,7 @@ public class CategoryService {
             if(category == null) {
                 throw new ValidationException("No record found for the category id " + categoryId, HttpStatus.NOT_FOUND);
             }
-            if(category.getIsActive() == false) {
-                throw new ValidationException("The category id " + categoryId + " is inactive", HttpStatus.FORBIDDEN);
-            }
+            activeStatus.isActiveOrNot(category.getIsActive());
             return this.mapCategoryToCategoryDTO(category);
         }
         catch (ValidationException e) {
@@ -60,6 +61,8 @@ public class CategoryService {
                 throw new ValidationException("No category found", HttpStatus.NOT_FOUND);
             }
             for (Category category : categories) {
+                if(!activeStatus.isActiveOrNot(category.getIsActive())) continue;
+                
                 categoryDTOs.add(this.mapCategoryToCategoryDTO(category));
             }
             return categoryDTOs;

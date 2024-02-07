@@ -30,6 +30,9 @@ public class BudgetService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ActiveStatus activeStatus;
     
     public BudgetDTO getBudgetById(Long budgetId) {
         
@@ -39,9 +42,7 @@ public class BudgetService {
             if(budget == null) {
                 throw new ValidationException("No record found for the budget id " + budgetId, HttpStatus.NOT_FOUND);
             }
-            if(budget.getIsActive() == false) {
-                throw new ValidationException("The budget id " + budgetId + " is inactive", HttpStatus.FORBIDDEN);
-            }
+            activeStatus.isActiveOrNot(budget.getIsActive());
             return this.mapBudgetToBudgetDTO(budget);
         }
         catch (ValidationException e) {
@@ -63,6 +64,8 @@ public class BudgetService {
             }
 
             for (Budget budget : budgets) {
+                if(activeStatus.isActiveOrNot(budget.getIsActive())) continue;
+                
                 budgetDTOs.add(this.mapBudgetToBudgetDTO(budget));
             }
             return budgetDTOs;

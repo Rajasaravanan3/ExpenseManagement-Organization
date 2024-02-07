@@ -43,4 +43,15 @@ public class ApprovalsController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    //admin's access
+    @GetMapping("/expense/{expenseId}")
+    public ResponseEntity<List<ApprovalsDTO>> getApprovalByExpenseId(@PathVariable("expenseId") Long expenseId) {
+
+        List<ApprovalsDTO> approval = approvalsService.getApprovalsByExpenseId(expenseId);
+        if(approval != null) {
+            return new ResponseEntity<>(approval, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }

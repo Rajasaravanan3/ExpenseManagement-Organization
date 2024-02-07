@@ -1,6 +1,5 @@
 package com.example.demo.ExpenseManagement.DTO;
 
-//DTO
 public class SignUpRequest {
     
     private String fullName;

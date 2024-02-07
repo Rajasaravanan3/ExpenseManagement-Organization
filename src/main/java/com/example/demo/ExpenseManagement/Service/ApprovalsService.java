@@ -74,7 +74,7 @@ public class ApprovalsService {
         }
     }
 
-    public List<ApprovalsDTO> getByExpenseId(Long expenseId) {
+    public List<ApprovalsDTO> getApprovalsByExpenseId(Long expenseId) {
         List<ApprovalsDTO> approvalsDTO = new ArrayList<>();
         List<Approvals> approvals = new ArrayList<>();
         try {

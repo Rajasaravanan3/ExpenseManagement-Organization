@@ -36,7 +36,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/currencies/**", "/categories/**", "/budgets/**").permitAll()
-                        .requestMatchers("/users/all/**", "/addresses", "/paymentMethods", "/currencies", "/categories", "/budgets", "/approvals/**").hasAuthority("ADMIN")
+                        .requestMatchers("/users/add-role", "/users/remove-role", "/users/all/**", "/addresses", "/paymentMethods", "/currencies", "/categories", "/budgets", "/approvals/**").hasAuthority("ADMIN")
 
                         .requestMatchers("/expenses/approver/**").hasAnyAuthority("APPROVER", "ADMIN")
 

@@ -44,14 +44,22 @@ public class AuthenticationService {
         
         User user = new User();
         try {
-            if(signUpRequest == null ||
-            (signUpRequest.getFullName() instanceof String && (signUpRequest.getFullName().isEmpty() || signUpRequest.getFullName().length() > 50)) ||
-            (signUpRequest.getUsername() instanceof String && (signUpRequest.getUsername().isEmpty() || signUpRequest.getUsername().length() > 350)) ||
-            (signUpRequest.getPassword() instanceof String && (signUpRequest.getPassword().isEmpty() || signUpRequest.getPassword().length() > 130)) ||
-            signUpRequest.getOrganizationId() == null) {
-
-                throw new ValidationException("Non null field value must not be null or empty and characters must not exceed limit.", HttpStatus.BAD_REQUEST);
+            if(signUpRequest == null) {
+                throw new ValidationException("User details must not be empty.", HttpStatus.BAD_REQUEST);
             }
+            if(signUpRequest.getFullName() instanceof String || signUpRequest.getFullName().isEmpty() || signUpRequest.getFullName().length() > 50) {
+                throw new ValidationException("fullName must not be null or exceed limit", HttpStatus.BAD_REQUEST);
+            }
+            if(signUpRequest.getUsername() == null || signUpRequest.getUsername().isEmpty() || signUpRequest.getUsername().length() > 350) {
+                throw new ValidationException("username must not be null or exceed limit", HttpStatus.BAD_REQUEST);
+            }
+            if(signUpRequest.getPassword() == null || signUpRequest.getPassword().isEmpty() || signUpRequest.getPassword().length() > 130) {
+                throw new ValidationException("password must not be null or exceed limit", HttpStatus.BAD_REQUEST);
+            }
+            if(signUpRequest.getOrganizationId() == null) {
+                throw new ValidationException("organizationId must not be null", HttpStatus.BAD_REQUEST);
+            }
+
             Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
             Pattern hashedPasswordPattern = Pattern.compile("^[a-zA-Z0-9+/]{8,}$");
             Pattern fullNamePattern = Pattern.compile("^[A-Za-z]+[ ]+[A-Za-z]+$");

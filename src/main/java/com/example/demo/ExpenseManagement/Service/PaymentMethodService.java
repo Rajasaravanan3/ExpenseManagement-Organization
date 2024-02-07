@@ -15,6 +15,9 @@ public class PaymentMethodService {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
+    @Autowired
+    private ActiveStatus activeStatus;
+
     public PaymentMethod getPaymentMethodById(Integer paymentMethodId) {
         
         PaymentMethod paymentMethod = null;
@@ -24,9 +27,7 @@ public class PaymentMethodService {
             if(paymentMethod == null) {
                 throw new ValidationException("No record found for the paymentMethod id " + paymentMethodId, HttpStatus.NOT_FOUND);
             }
-            else if(paymentMethod.getIsActive() == false) {
-                throw new ValidationException("The paymentMethod id " + paymentMethodId + " is inactive", HttpStatus.FORBIDDEN);
-            }
+            activeStatus.isActiveOrNot(paymentMethod.getIsActive());
         }
         catch (ValidationException e) {
             throw e;
