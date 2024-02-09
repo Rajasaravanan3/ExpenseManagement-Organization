@@ -43,6 +43,15 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PutMapping("/sign-out")
+    public ResponseEntity<Void> signOut(@RequestBody Long userId) {
+
+        UserDTO userDTO = userService.getUserById(userId);
+        userDTO.setIsActive(false);
+        userService.updateUser(userDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     // get users working for an organization
     // admin's access
     @GetMapping("/all")

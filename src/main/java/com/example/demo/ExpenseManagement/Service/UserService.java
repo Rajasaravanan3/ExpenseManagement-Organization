@@ -154,7 +154,7 @@ public class UserService implements UserDetailsService {
             
             users = userRepository.findAllUsers(organizationId);
             for (User user : users) {
-                if(!user.getIsActive()) continue;
+                if(!(user.getIsActive())) continue;
 
                 userDTOList.add(this.mapUserToUserDTO(user));
             }
@@ -245,7 +245,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDTO user = this.getUserByUsername(username);
+        User user = userRepository.findByUsername(username);
         user.setPassword(encoder.encode(user.getPassword()));
         return user;
     }

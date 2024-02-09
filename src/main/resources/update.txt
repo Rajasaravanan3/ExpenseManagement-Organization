@@ -1,0 +1,3 @@
+actuator endpoints
+add ACTUATOR role
+security config -> /actuator/** hasAuthority("ACTUATOR")

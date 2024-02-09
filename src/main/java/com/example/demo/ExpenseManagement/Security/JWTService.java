@@ -21,9 +21,10 @@ public class JWTService {
 
     public String generateAccessToken(User user) {
 
-        return Jwts.builder().setSubject(user.getUsername())
+        return Jwts.builder()
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .claim("organizationId", user.getOrganization().getOrganizationId())
                 .claim("roles", user.getAuthorities())
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -32,9 +33,10 @@ public class JWTService {
 
     public String generateRefreshToken(Map<String, Object> extraClaims, User user) {
 
-        return Jwts.builder().setClaims(extraClaims).setSubject(user.getUsername())
+        return Jwts.builder().setClaims(extraClaims)
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 7))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
                 .claim("organizationId", user.getOrganization().getOrganizationId())
                 .claim("roles", user.getAuthorities())
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -43,7 +45,7 @@ public class JWTService {
 
     private Key getSignInKey() {
 
-        byte[] key = Decoders.BASE64.decode("!@#$%^&*(()ASDFGHJKLQWERTYUIOPXCVBNMASDFHJKLGQWERTYUIOPZXCVBNM");
+        byte[] key = Decoders.BASE64.decode("!@#$%^&*()ASDFGHJKLQWERTYUIOPXCVBNMASDFHJKLGQWERTYUIOPZXCVBNM");
         return Keys.hmacShaKeyFor(key);
     }
 

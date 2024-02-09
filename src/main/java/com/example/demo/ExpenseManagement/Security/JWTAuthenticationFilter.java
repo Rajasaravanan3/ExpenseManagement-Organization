@@ -31,33 +31,28 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-                
-        String path = request.getRequestURI();
-        if(path.contains("auth")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         String authHeader = request.getHeader("Authorization");
-        String jwt;
+        String jwtToken;
         String userEmail;
 
-        if (authHeader instanceof String && (authHeader.isEmpty() || !authHeader.startsWith("Bearer"))) {
+        if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer")) {
+
             filterChain.doFilter(request, response);
             return;
         }
-        jwt = authHeader.substring(7);
+        jwtToken = authHeader.substring(7);
 
-        if (jwt == null) {
+        if (jwtToken == null) {
             throw new UsernameNotFoundException("User not found");
         }
-
-        userEmail = jwtService.extractUserName(jwt);
+        
+        userEmail = jwtService.extractUserName(jwtToken);
 
         if (!userEmail.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userService.loadUserByUsername(userEmail);
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (jwtService.isTokenValid(jwtToken, userDetails)) {
 
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 

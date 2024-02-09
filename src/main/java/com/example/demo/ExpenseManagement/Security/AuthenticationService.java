@@ -17,10 +17,8 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 
 @Service
 public class AuthenticationService {
@@ -34,29 +32,34 @@ public class AuthenticationService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // @Autowired
-    // private AuthenticationManager authenticationManager;
-
     @Autowired
     private JWTService jwtService;
 
     public User signUp(SignUpRequest signUpRequest) {
-        
+
         User user = new User();
         try {
-            if(signUpRequest == null) {
+            User checkUserAlreadyPresent = userRepository.findByUsername(signUpRequest.getUsername());
+            if(checkUserAlreadyPresent != null && checkUserAlreadyPresent.getIsActive()) {
+                throw new ValidationException("User already exits with username:" + signUpRequest.getUsername(), HttpStatus.CONFLICT);
+            }
+
+            if (signUpRequest == null) {
                 throw new ValidationException("User details must not be empty.", HttpStatus.BAD_REQUEST);
             }
-            if(signUpRequest.getFullName() instanceof String || signUpRequest.getFullName().isEmpty() || signUpRequest.getFullName().length() > 50) {
+            if (signUpRequest.getFullName() == null || signUpRequest.getFullName().isEmpty()
+                    || signUpRequest.getFullName().length() > 50) {
                 throw new ValidationException("fullName must not be null or exceed limit", HttpStatus.BAD_REQUEST);
             }
-            if(signUpRequest.getUsername() == null || signUpRequest.getUsername().isEmpty() || signUpRequest.getUsername().length() > 350) {
+            if (signUpRequest.getUsername() == null || signUpRequest.getUsername().isEmpty()
+                    || signUpRequest.getUsername().length() > 350) {
                 throw new ValidationException("username must not be null or exceed limit", HttpStatus.BAD_REQUEST);
             }
-            if(signUpRequest.getPassword() == null || signUpRequest.getPassword().isEmpty() || signUpRequest.getPassword().length() > 130) {
+            if (signUpRequest.getPassword() == null || signUpRequest.getPassword().isEmpty()
+                    || signUpRequest.getPassword().length() > 130) {
                 throw new ValidationException("password must not be null or exceed limit", HttpStatus.BAD_REQUEST);
             }
-            if(signUpRequest.getOrganizationId() == null) {
+            if (signUpRequest.getOrganizationId() == null) {
                 throw new ValidationException("organizationId must not be null", HttpStatus.BAD_REQUEST);
             }
 
@@ -69,13 +72,11 @@ public class AuthenticationService {
             boolean validName = matcher.find();
             boolean validEmail = emailPattern.matcher(signUpRequest.getUsername()).find();
             boolean validPassword = hashedPasswordPattern.matcher(signUpRequest.getPassword()).find();
-            if(!validName) {
+            if (!validName) {
                 throw new ValidationException("Invalid username", HttpStatus.BAD_REQUEST);
-            }
-            else if(!validEmail) {
+            } else if (!validEmail) {
                 throw new ValidationException("Invalid email address", HttpStatus.BAD_REQUEST);
-            }
-            else if(!validPassword) {
+            } else if (!validPassword) {
                 throw new ValidationException("Invalid password", HttpStatus.BAD_REQUEST);
             }
 
@@ -83,8 +84,9 @@ public class AuthenticationService {
             user.setUsername(signUpRequest.getUsername());
             user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
             Organization organization = organizationRepository.findOrganizationById(signUpRequest.getOrganizationId());
-            if(organization == null) {
-                throw new ValidationException("organization not found for id " + signUpRequest.getOrganizationId(), HttpStatus.NOT_FOUND);
+            if (organization == null) {
+                throw new ValidationException("organization not found for id " + signUpRequest.getOrganizationId(),
+                        HttpStatus.NOT_FOUND);
             }
             user.setOrganization(organization);
             user.setIsActive(true);
@@ -92,11 +94,9 @@ public class AuthenticationService {
             // only admin can set role to user
 
             return userRepository.saveAndFlush(user);
-        }
-        catch (ValidationException e) {
+        } catch (ValidationException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new ApplicationException("An unexpected error occured while trying to signup");
         }
     }
@@ -105,9 +105,12 @@ public class AuthenticationService {
 
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         try {
-            if(signInRequest == null ||
-            (signInRequest.getUsername() instanceof String && (signInRequest.getUsername().isEmpty() || signInRequest.getUsername().length() > 350)) ||
-            (signInRequest.getPassword() instanceof String && (signInRequest.getPassword().isEmpty() || signInRequest.getPassword().length() > 130))) {
+            if (signInRequest == null ||
+                    (signInRequest.getUsername() instanceof String
+                            && (signInRequest.getUsername().isEmpty() || signInRequest.getUsername().length() > 350))
+                    ||
+                    (signInRequest.getPassword() instanceof String
+                            && (signInRequest.getPassword().isEmpty() || signInRequest.getPassword().length() > 130))) {
                 throw new ValidationException("credentials cannot be null or exceed limit", HttpStatus.BAD_REQUEST);
             }
 
@@ -116,21 +119,14 @@ public class AuthenticationService {
                 throw new ValidationException("Invalid email or password", HttpStatus.UNAUTHORIZED);
             }
 
-            // authenticationManager.authenticate(
-            // new UsernamePasswordAuthenticationToken(signInRequest.getUsername(),
-            // signInRequest.getPassword()));
-
             String accessToken = jwtService.generateAccessToken(user);
             String refreshToken = jwtService.generateRefreshToken(new HashMap<>(), user);
 
-            
             jwtAuthenticationResponse.setAccessToken(accessToken);
             jwtAuthenticationResponse.setRefreshToken(refreshToken);
-        }
-        catch (ValidationException e) {
+        } catch (ValidationException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new ApplicationException("An unexpected error occured while trying to signin");
         }
         return jwtAuthenticationResponse;
@@ -141,23 +137,21 @@ public class AuthenticationService {
         try {
             String username = jwtService.extractUserName(refreshToken.getRefreshToken());
             User user = userRepository.findByUsername(username);
-            if(user == null) {
+            if (user == null) {
                 throw new ValidationException("Invalid refresh token", HttpStatus.UNAUTHORIZED);
             }
-            
-            if(jwtService.isTokenValid(refreshToken.getRefreshToken(), user)) {
-                
+
+            if (jwtService.isTokenValid(refreshToken.getRefreshToken(), user)) {
+
                 String accessToken = jwtService.generateAccessToken(user);
                 JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
                 jwtAuthenticationResponse.setAccessToken(accessToken);
                 jwtAuthenticationResponse.setRefreshToken(refreshToken.getRefreshToken());
                 return jwtAuthenticationResponse;
             }
-        }
-        catch (ValidationException e) {
+        } catch (ValidationException e) {
             throw e;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new ApplicationException("An unexpected error occured while trying to refresh token");
         }
         return null;
